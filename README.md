@@ -1,17 +1,46 @@
-This README.md file is displayed on your project page. You should edit this 
-file to describe your project, including instructions for building and 
-running the project, pointers to the license under which you are making the 
-project available, and anything else you think would be useful for others to
-know.
+weather-demo - a Bluemix demo using a weather service
+================================================================================
 
-We have created an empty license.txt file for you. Well, actually, it says,
-"<Replace this text with the license you've chosen for your project.>" We 
-recommend you edit this and include text for license terms under which you're
-making your code available. A good resource for open source licenses is the 
-[Open Source Initiative](http://opensource.org/).
 
-Be sure to update your project's profile with a short description and 
-eye-catching graphic.
 
-Finally, consider defining some sprints and work items in Track & Plan to give 
-interested developers a sense of your cadence and upcoming enhancements.
+mapping APIs
+================================================================================
+
+This application makes use of Leaflet and the Esri Leaflet APIs for mapping
+
+* Leaflet:      <http://leafletjs.com/reference.html>
+* Esri-Leaflet: <http://esri.github.io/esri-leaflet/api-reference/>
+
+
+
+hacking
+================================================================================
+
+This project uses [cake](http://coffeescript.org/#cake) as it's
+build tool.  To rebuild the project continuously, use the command
+
+    npm run watch
+
+Other `cake` commands are available (assuming you are using npm v2) with
+the command
+
+    npm run cake -- <command here>
+
+Run `npm run cake` to see the other commands available in the `Cakefile`.
+
+
+
+license
+================================================================================
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

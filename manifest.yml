@@ -1,0 +1,7 @@
+---
+
+applications:
+- name:      weather-demo
+  host:      weather-demo
+  memory:    257M
+  command:   node app
