@@ -10,7 +10,19 @@ html, body {
   height: 100%;
 }
 
-.location-icon {
+.info {
+  background-color: #DDD;
+  padding:          1.0em 1.0em;
+}
+
+/* weather icons */
+.wi {
+  text-shadow: 0px 0px 10px #FFF;
+  font-size:   400%;
+}
+
+.wi.wi-day-sunny {
+  text-shadow: 0px 0px 10px #F00;
 }
 
 /*
