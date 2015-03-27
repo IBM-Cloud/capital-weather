@@ -5,16 +5,29 @@ function getHelpHTML() {
   var html = []
 
   html.push("<h1>capital weather</h1>")
+
   html.push("<p>This application displays the weather in")
   html.push("capitals around the world, and US state capitals.")
+
   html.push("<p>Double-click on the map to see the weather in the")
   html.push("new location.")
+
+  html.push("<p><strong>Note the links below are not yet fully operational.</strong>")
+
+  html.push("<p>This application uses the")
+  html.push("<a href='https://bluemix.net' target='_blank'>Bluemix</a>")
+  html.push("FooBar service to obtain weather information.")
+  html.push("See the")
+  html.push("<a href='https://www.ng.bluemix.net/docs/#services/Cloudant/index.html#Cloudant' target='_blank'>FooBar service documentation</a>")
+  html.push("for more information about using this service in your Bluemix application.")
+
   html.push("<p>The source for this application is available at")
   html.push("<a href='https://github.com/IBM-Bluemix/capital-weather' target='_blank'>")
   html.push("github.com/IBM-Bluemix/capital-weather")
   html.push("</a>")
+
   html.push("<p><a href='https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/capital-weather.git' target='_blank'>")
-  html.push("<img src='http://bluemix.net/deploy/button.png' alt='Bluemix button' />")
+  html.push("<img src='https://hub.jazz.net/deploy/button.png' alt='Bluemix button' />")
   html.push("</a>")
 
   return html.join("\n")

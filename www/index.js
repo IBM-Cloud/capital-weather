@@ -17,7 +17,9 @@ Locations = getLocations()
 
 //------------------------------------------------------------------------------
 function onLoad() {
-  Map = L.map("map")
+  Map = L.map("map", {
+    doubleClickZoom: false
+  })
 
   // add markers, calculate bounds
   Locations.forEach(function(location){
@@ -132,11 +134,25 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var icon = code2icon(icon_code)
 
   var desc = observation.phrase_32char
+  var temp = "???"
+  var wspd = "???"
 
-  var temp = ""
   if (observation.imperial) {
-    temp = observation.imperial.temp + "F - "
+    temp = observation.imperial.temp + "&deg; F"
+    wspd = observation.imperial.wspd + " mph"
   }
+
+  var uv_index  = observation.uv_index
+  var uv_phrase = UV_desc[uv_index] || "???"
+
+  var table = [
+    "<table class='xtable xtable-condensed'>",
+      "<tr><td>conditions:  <td class='td-indent'>" + desc,
+      "<tr><td>temperature: <td class='td-indent'>" + temp,
+      "<tr><td>wind speed:  <td class='td-indent'>" + wspd,
+      "<tr><td>uv index:    <td class='td-indent'>" + uv_phrase,
+    "</table>"
+  ].join("\n")
 
   var icon = L.divIcon({
     html:      "<i class='wi " + icon + "'></i>",
@@ -144,7 +160,7 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     className: "location-icon"
   })
 
-  var popupText = location.name + "<br>" + temp + desc
+  var popupText = location.name + "<p>" + table
 
   var marker = location.marker
   marker.setIcon(icon)
@@ -158,6 +174,24 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   function displayMarker() {
 
   }
+}
+
+//------------------------------------------------------------------------------
+var UV_desc = {
+  0:  "Low",
+  1:  "Low",
+  2:  "Low",
+  3:  "Moderate",
+  4:  "Moderate",
+  5:  "Moderate",
+  6:  "High",
+  7:  "High",
+  8:  "Very High",
+  9:  "Very High",
+  10: "Very High",
+  11: "Extreme",
+  12: "Extreme",
+  13: "Extreme",
 }
 
 //------------------------------------------------------------------------------
