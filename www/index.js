@@ -14,6 +14,9 @@ var Help
 $(onLoad)
 
 Locations = getLocations()
+if (location.hostname == "localhost") {
+  Locations = Locations.slice(0,10)
+}
 
 //------------------------------------------------------------------------------
 function onLoad() {
@@ -145,13 +148,21 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var uv_index  = observation.uv_index
   var uv_phrase = UV_desc[uv_index] || "???"
 
+  var loc = JSON.stringify({
+    lat:  location.lat,
+    lon:  location.lon,
+    name: location.name
+  })
+
+  var onClick = "javascript:getHistoricConditions(" + loc + ")"
   var table = [
-    "<table class='xtable xtable-condensed'>",
+    "<table>",
       "<tr><td>conditions:  <td class='td-indent'>" + desc,
       "<tr><td>temperature: <td class='td-indent'>" + temp,
       "<tr><td>wind speed:  <td class='td-indent'>" + wspd,
       "<tr><td>uv index:    <td class='td-indent'>" + uv_phrase,
-    "</table>"
+    "</table>",
+    "<p><button class='button' onclick='" + onClick + "'>display historical data</a>"
   ].join("\n")
 
   var icon = L.divIcon({
@@ -160,20 +171,104 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     className: "location-icon"
   })
 
-  var popupText = location.name + "<p>" + table
+  var popupText = "<h4>" + location.name + "</h4><p>" + table
 
   var marker = location.marker
   marker.setIcon(icon)
   marker.bindPopup(popupText)
   marker.setOpacity(1)
+}
 
-  // delay display to let bootstrap do it's thing
-  setTimeout(displayMarker, 1000)
+//------------------------------------------------------------------------------
+function getHistoricConditions(location) {
+  var lat = location.lat
+  var lon = location.lon
 
-  //-----------------------------------
-  function displayMarker() {
+  L.popup()
+    .setContent("getting historical data ... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setLatLng(location)
+    .openOn(Map)
 
+  $.ajax("/api/historicConditions/" + lat + "," + lon, {
+    dataType: "json",
+    success: function(data, status, jqXhr) {
+      gotHistoricConditions(location, data, status, jqXhr)
+    },
+    error: function() {
+      L.popup()
+        .setContent("error getting historical data; sorry! :-(")
+        .setLatLng(location)
+        .openOn(Map)
+    }
+  })
+}
+
+//------------------------------------------------------------------------------
+function gotHistoricConditions(location, data, status, jqXhr) {
+  try {
+    gotHistoricConditions_(location, data, status, jqXhr)
   }
+  catch(e) {
+    L.popup()
+      .setContent("error getting historical data; sorry! :-(")
+      .setLatLng(location)
+      .openOn(Map)
+    }
+}
+
+//------------------------------------------------------------------------------
+function gotHistoricConditions_(location, data, status, jqXhr) {
+  console.log(location)
+
+  var history = []
+
+  for (var i=0; i<data.length; i++) {
+    var obs = data[i].observations[0]
+    if (null == obs) continue
+    if (null == obs.valid_time_gmt) continue
+    if (null == obs.temp) continue
+    if (null == obs.wx_phrase) obs.wx_phrase = "unknown"
+
+    var date = new Date(obs.valid_time_gmt * 1000)
+    var year = date.getYear() + 1900
+
+    history.push([year, obs.temp, obs.wx_phrase])
+  }
+
+  showHistory(location, history)
+}
+
+//------------------------------------------------------------------------------
+function showHistory(location, history) {
+  Map.closePopup()
+
+  var table = [
+    "<table>",
+      "<tr><td><strong>year</strong> <td class='td-indent'><strong>temp</strong> <td class='td-indent'><strong>conditions</strong>",
+  ]
+
+  history.forEach(function(data){
+    var year  = data[0]
+    var temp  = data[1] + "&deg; F"
+    var cond  = data[2]
+    var entry = "<tr><td>" + year +
+                "<td class='td-indent'>" + temp +
+                "<td class='td-indent'>" + cond
+
+    table.push(entry)
+  })
+
+  table.push("</table>")
+
+  table = table.join("\n")
+
+  var desc = "<p>conditions on this day in previous years"
+  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + table
+
+  L.popup()
+    .setContent(popupHTML)
+    .setLatLng(location)
+    .openOn(Map)
 }
 
 //------------------------------------------------------------------------------

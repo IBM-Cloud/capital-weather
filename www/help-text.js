@@ -4,13 +4,15 @@
 function getHelpHTML() {
   var html = []
 
-  html.push("<h1>capital weather</h1>")
+  html.push("<h3>capital weather</h3>")
 
   html.push("<p>This application displays the weather in")
   html.push("capitals around the world, and US state capitals.")
 
-  html.push("<p>Double-click on the map to see the weather in the")
-  html.push("new location.")
+  html.push("<p>Click on a weather icon to see detailed weather information")
+  html.push("about that location.")
+  html.push("Double-click elsewhere on the map to see the weather in the")
+  html.push("that location.")
 
   html.push("<p><strong>Note the links below are not yet fully operational.</strong>")
 

@@ -14,6 +14,7 @@
     "url" :             "https://github.com/IBM-Bluemix/capital-weather"
   },
   "dependencies": {
+    "async":            "0.9.x",
     "cfenv":            "1.0.x",
     "hapi":             "8.4.x",
     "lru-cache":        "2.5.x",
