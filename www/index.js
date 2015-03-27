@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 var Map
+var Help
 
 $(onLoad)
 
@@ -52,18 +53,47 @@ function onLoad() {
   // add info box
   var info = L.control({position: "bottomleft"})
 
+  Help = L.popup()
+    .setContent(getHelpHTML())
+
   info.onAdd = function (map) {
     var div = L.DomUtil.create("div")
 
-    div.innerHTML =
-      "<a href='https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/weather-demo.git' target='_blank'>" +
-        "<img src='http://bluemix.net/deploy/button.png' alt='Bluemix button' />" +
-      "</a>"
+    div.innerHTML = "<button id='help-button' type='button' class='btn btn-default'>Help</button>"
+
+    $(document).on( "click", "#help-button", function() {
+      displayHelp()
+    })
 
     return div
   }
 
   info.addTo(Map)
+
+//  if (!localStorage.firstTime) {
+//    localStorage.firstTime = false
+
+    setTimeout(displayHelp, 1000)
+//  }
+
+  Map.on("dblclick", function(e) {
+    var location = {
+      lat:  e.latlng.lat,
+      lon:  e.latlng.lng,
+      name: e.latlng.lat + "," + e.latlng.lng
+    }
+
+    var marker = L.marker(location, {
+      title:   location.name,
+      alt:     location.name,
+      opacity: 0
+    })
+
+    location.marker = marker
+    marker.addTo(Map)
+
+    getCurrentConditions(location)
+  })
 
   // fit to bounds
   var bounds = [
@@ -71,6 +101,13 @@ function onLoad() {
     { lat: 38.55, lon: -121.46 }, // california
   ]
   Map.fitBounds(bounds, {padding:[0,0]})
+}
+
+//------------------------------------------------------------------------------
+function displayHelp(location) {
+  Help
+    .setLatLng(Map.getCenter())
+    .openOn(Map)
 }
 
 //------------------------------------------------------------------------------
@@ -112,13 +149,14 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var marker = location.marker
   marker.setIcon(icon)
   marker.bindPopup(popupText)
+  marker.setOpacity(1)
 
   // delay display to let bootstrap do it's thing
   setTimeout(displayMarker, 1000)
 
   //-----------------------------------
   function displayMarker() {
-    marker.setOpacity(1)
+
   }
 }
 

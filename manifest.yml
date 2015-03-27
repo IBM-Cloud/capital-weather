@@ -1,7 +1,7 @@
 ---
 
 applications:
-- name:      weather-demo
-  host:      weather-demo
-  memory:    257M
+- name:      capital-weather
+  host:      capital-weather
+  memory:    256M
   command:   node app

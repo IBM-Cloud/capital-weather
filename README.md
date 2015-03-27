@@ -1,4 +1,4 @@
-weather-demo - a Bluemix demo using a weather service
+capital-weather - a Bluemix demo using a weather service
 ================================================================================
 
 

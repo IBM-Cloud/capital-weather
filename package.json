@@ -1,5 +1,5 @@
 {
-  "name":               "weather-demo",
+  "name":               "capital-weather",
   "version":            "1.0.0",
   "description":        "demo using a weather service",
   "author":             "pmuellr",
@@ -7,11 +7,11 @@
     "cake":             "cake",
     "watch":            "cake watch"
   },
-  "homepage":           "https://github.com/IBM-Bluemix/weather-demo",
+  "homepage":           "https://github.com/IBM-Bluemix/capital-weather",
   "license":            "Apache-2.0",
   "repository": {
     "type":             "git",
-    "url" :             "https://github.com/IBM-Bluemix/weather-demo"
+    "url" :             "https://github.com/IBM-Bluemix/capital-weather"
   },
   "dependencies": {
     "cfenv":            "1.0.x",
