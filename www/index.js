@@ -53,9 +53,9 @@ function onLoad() {
   var info = L.control({position: "bottomleft"})
 
   info.onAdd = function (map) {
-    var div = L.DomUtil.create("div", "info")
+    var div = L.DomUtil.create("div")
 
-    div.innerHTML = "<h3>Weather Demo</h3>" +
+    div.innerHTML =
       "<a href='https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/weather-demo.git' target='_blank'>" +
         "<img src='http://bluemix.net/deploy/button.png' alt='Bluemix button' />" +
       "</a>"
