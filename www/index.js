@@ -13,6 +13,8 @@ var Help
 
 $(onLoad)
 
+// Get capital cities from locations.js file
+// If on local, only use 1st city for debugging
 Locations = getLocations()
 if (location.hostname == "localhost") {
   Locations = Locations.slice(0,10)
@@ -24,7 +26,7 @@ function onLoad() {
     doubleClickZoom: false
   })
 
-  // add markers, calculate bounds
+  // add markers to all locations
   Locations.forEach(function(location){
     getCurrentConditions(location)
 
@@ -55,7 +57,7 @@ function onLoad() {
 
   L.control.layers(baseMaps).addTo(Map)
 
-  // add info box
+  // add help info box
   var info = L.control({position: "bottomleft"})
 
   Help = L.popup()
@@ -81,11 +83,12 @@ function onLoad() {
     setTimeout(displayHelp, 1000)
 //  }
 
+  // Gets the current weather conditions on the location clicked
   Map.on("dblclick", function(e) {
     var location = {
       lat:  e.latlng.lat,
       lon:  e.latlng.lng,
-      name: e.latlng.lat + "," + e.latlng.lng
+      name: e.latlng.lat.toFixed(4) + ", " + e.latlng.lng.toFixed(4)
     }
 
     var marker = L.marker(location, {
@@ -100,7 +103,7 @@ function onLoad() {
     getCurrentConditions(location)
   })
 
-  // fit to bounds
+  // fit map to initial bounds
   var bounds = [
     { lat: 44.32, lon:  -69.76 }, // maine
     { lat: 38.55, lon: -121.46 }, // california
@@ -109,6 +112,7 @@ function onLoad() {
 }
 
 //------------------------------------------------------------------------------
+// Displays the help text box in the center of the web page
 function displayHelp(location) {
   Help
     .setLatLng(Map.getCenter())
@@ -116,6 +120,7 @@ function displayHelp(location) {
 }
 
 //------------------------------------------------------------------------------
+// Retrieves the current weather conditions from Jetstream
 function getCurrentConditions(location) {
   var lat = location.lat
   var lon = location.lon
@@ -129,6 +134,7 @@ function getCurrentConditions(location) {
 }
 
 //------------------------------------------------------------------------------
+// Called after successfully retrieving the current weather conditions
 function gotCurrentConditions(location, data, status, jqXhr) {
   var observation = data.observation
   if (null == observation) return
@@ -157,12 +163,12 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var onClick = "javascript:getHistoricConditions(" + loc + ")"
   var table = [
     "<table>",
-      "<tr><td>conditions:  <td class='td-indent'>" + desc,
-      "<tr><td>temperature: <td class='td-indent'>" + temp,
-      "<tr><td>wind speed:  <td class='td-indent'>" + wspd,
-      "<tr><td>uv index:    <td class='td-indent'>" + uv_phrase,
+      "<tr><td>Conditions:  <td class='td-indent'>" + desc,
+      "<tr><td>Temperature: <td class='td-indent'>" + temp,
+      "<tr><td>Wind Speed:  <td class='td-indent'>" + wspd,
+      "<tr><td>UV Index:    <td class='td-indent'>" + uv_phrase,
     "</table>",
-    "<p><button class='button' onclick='" + onClick + "'>display historical data</a>"
+    "<p><button class='button' onclick='" + onClick + "'>Display Historical Data</a>"
   ].join("\n")
 
   var icon = L.divIcon({
@@ -185,7 +191,7 @@ function getHistoricConditions(location) {
   var lon = location.lon
 
   L.popup()
-    .setContent("getting historical data ... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setContent("Getting historical data... <br><center><img src='spiffygif_30x30.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -196,7 +202,7 @@ function getHistoricConditions(location) {
     },
     error: function() {
       L.popup()
-        .setContent("error getting historical data; sorry! :-(")
+        .setContent("Error getting historical data, sorry!")
         .setLatLng(location)
         .openOn(Map)
     }
@@ -204,13 +210,20 @@ function getHistoricConditions(location) {
 }
 
 //------------------------------------------------------------------------------
+// Take returned historic conditions and parse them for display
 function gotHistoricConditions(location, data, status, jqXhr) {
   try {
     gotHistoricConditions_(location, data, status, jqXhr)
   }
+  // If no historical results were available or error parsing, print message on pop-up
   catch(e) {
+    var errMsg;
+    if (typeof e === 'string')
+      errMsg = e;
+    else
+      errMsg = "Error getting historical data, sorry!"
     L.popup()
-      .setContent("error getting historical data; sorry! :-(")
+      .setContent(errMsg)
       .setLatLng(location)
       .openOn(Map)
     }
@@ -218,16 +231,22 @@ function gotHistoricConditions(location, data, status, jqXhr) {
 
 //------------------------------------------------------------------------------
 function gotHistoricConditions_(location, data, status, jqXhr) {
-  console.log(location)
-
   var history = []
+  var noDataAvailable = 0;
 
+  // Loop through the returned historical data sets for each year
   for (var i=0; i<data.length; i++) {
+    // If there was no data available for this date, add to count
+    if (data[i].errors)
+    {
+      noDataAvailable++;
+      continue;
+    }
     var obs = data[i].observations[0]
     if (null == obs) continue
     if (null == obs.valid_time_gmt) continue
     if (null == obs.temp) continue
-    if (null == obs.wx_phrase) obs.wx_phrase = "unknown"
+    if (null == obs.wx_phrase) obs.wx_phrase = "Unknown"
 
     var date = new Date(obs.valid_time_gmt * 1000)
     var year = date.getYear() + 1900
@@ -235,7 +254,12 @@ function gotHistoricConditions_(location, data, status, jqXhr) {
     history.push([year, obs.temp, obs.wx_phrase])
   }
 
-  showHistory(location, history)
+  // If no historical data was available, throw error
+  // Otherwise, configure the pop-up window to display the data
+  if (noDataAvailable === data.length)
+    throw "No historical data available, sorry!"
+  else
+    showHistory(location, history)
 }
 
 //------------------------------------------------------------------------------
@@ -244,7 +268,7 @@ function showHistory(location, history) {
 
   var table = [
     "<table>",
-      "<tr><td><strong>year</strong> <td class='td-indent'><strong>temp</strong> <td class='td-indent'><strong>conditions</strong>",
+      "<tr><td><strong>Year</strong> <td class='td-indent'><strong>Temp</strong> <td class='td-indent'><strong>Conditions</strong>",
   ]
 
   history.forEach(function(data){
@@ -262,7 +286,7 @@ function showHistory(location, history) {
 
   table = table.join("\n")
 
-  var desc = "<p>conditions on this day in previous years"
+  var desc = "<p>Conditions on this day in previous years:"
   var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + table
 
   L.popup()

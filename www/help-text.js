@@ -11,7 +11,7 @@ function getHelpHTML() {
 
   html.push("<p>Click on a weather icon to see detailed weather information")
   html.push("about that location.")
-  html.push("Double-click elsewhere on the map to see the weather in the")
+  html.push("Double-click elsewhere on the map to see the weather in")
   html.push("that location.")
 
   html.push("<p><strong>Note the links below are not yet fully operational.</strong>")
