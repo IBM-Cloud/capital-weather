@@ -29,6 +29,30 @@ html, body {
   text-shadow: 0px 0px 10px #F00;
 }
 
+.wi.wi-dust {
+  text-shadow: 0px 0px 10px #f4a460;
+}
+
+.wi.wi-fog, .wi.wi-smoke {
+  text-shadow: 0px 0px 10px #575757;
+}
+
+.wi.wi-sleet, .wi.wi-cloudy {
+  text-shadow: 0px 0px 10px #767676;
+}
+
+.wi.wi-sprinkle, .wi.wi-rain {
+  text-shadow: 0px 0px 10px #00F;
+}
+
+.wi.wi-snow, .wi.wi-hail {
+  text-shadow: 0px 0px 10px #FFF;
+}
+
+.wi.wi-lightning, .wi.wi-thunderstorm {
+  text-shadow: 0px 0px 10px #FF0;
+}
+
 /*
 //==============================================================================
 // Licensed under the Apache License, Version 2.0 (the "License");

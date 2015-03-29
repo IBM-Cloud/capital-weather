@@ -160,15 +160,22 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     name: location.name
   })
 
-  var onClick = "javascript:getHistoricConditions(" + loc + ")"
+  var onHistoryClick = "javascript:getHistoricConditions(" + loc + ")"
+  var onPastDateClick = "javascript:enterDate(" + loc + ", false)"
+  var onFutureDateClick = "javascript:enterDate(" + loc + ", true)"
   var table = [
     "<table>",
       "<tr><td>Conditions:  <td class='td-indent'>" + desc,
       "<tr><td>Temperature: <td class='td-indent'>" + temp,
       "<tr><td>Wind Speed:  <td class='td-indent'>" + wspd,
       "<tr><td>UV Index:    <td class='td-indent'>" + uv_phrase,
-    "</table>",
-    "<p><button class='button' onclick='" + onClick + "'>Display Historical Data</a>"
+    "</table>"
+  ].join("\n")
+
+  var buttons = [
+    "<p><button class='button' onclick='" + onHistoryClick + "'>Display Historical Data</button></p>",
+    "<p><button class='button' onclick='" + onPastDateClick + "'>Get Past Day's Weather</button></p>",
+    "<p><button class='button' onclick='" + onFutureDateClick + "'>Predict Future Day's Weather</button></p>"
   ].join("\n")
 
   var icon = L.divIcon({
@@ -177,12 +184,235 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     className: "location-icon"
   })
 
-  var popupText = "<h4>" + location.name + "</h4><p>" + table
+  var popupText = "<h4>" + location.name + "</h4><p>" + table + buttons
 
   var marker = location.marker
   marker.setIcon(icon)
   marker.bindPopup(popupText)
   marker.setOpacity(1)
+}
+
+//------------------------------------------------------------------------------
+// Instructs the user to enter a date so they can get past/future weather data
+function enterDate(location, getFuture) {
+  var loc = JSON.stringify({
+    lat:  location.lat,
+    lon:  location.lon,
+    name: location.name
+  })
+
+  var curDate = new Date(),
+      curYear = curDate.getYear() + 1900,
+      curMonth = curDate.getMonth() + 1,
+      curDay = curDate.getDate();
+
+  // Sets the pop up text based on if getting past or future date
+  var instructions, minMonth, maxMonth, minDay, maxDay, minYear, maxYear, onDateClick, buttonText;
+  if (getFuture)
+  {
+    instructions = "Input a future date to predict the weather"
+    minMonth = 1
+    maxMonth = 12
+    minDay = 1
+    maxDay = 31
+    minYear = curYear
+    maxYear = 3000
+    onDateClick = "javascript:getFutureDateData(" + loc + ")"
+    buttonText = "Predict the Weather"
+  }
+  else
+  {
+    instructions = "Input a past date to get the historical weather data"
+    minMonth = 1
+    maxMonth = 12
+    minDay = 1
+    maxDay = 31
+    minYear = 1970
+    maxYear = curYear
+    onDateClick = "javascript:getPastDateData(" + loc + ")"
+    buttonText = "Display Past Weather Data"
+  }
+
+  var popUpText = [
+    "<p>" + instructions + "</p>" +
+    "<p>Month: <input id='monthInput' type='number' min='" + minMonth + "' max='" + maxMonth + "' width='2' placeholder='" + curMonth.toString() + "'></p>",
+    "<p>Day: <input id='dayInput' type='number' min='" + minDay + "' max='" + maxDay + "' width='2' placeholder='" + curDay.toString() + "'></p>",
+    "<p>Year: <input id='yearInput' type='number' min='" + minYear + "' max='" + maxYear + "' width='4' placeholder='" + curYear.toString() + "'></p>",
+    "<p><button class='button' onclick='" + onDateClick + "'>" + buttonText + "</button></p>",
+  ].join("\n")
+
+  L.popup()
+    .setContent(popUpText)
+    .setLatLng(location)
+    .openOn(Map)
+}
+
+//------------------------------------------------------------------------------
+// Gets the weather for the input futuredate
+function getFutureDateData(location) {
+  var month = document.getElementById('monthInput').value
+  var day = document.getElementById('dayInput').value
+  var year = document.getElementById('yearInput').value
+  var lat = location.lat
+  var lon = location.lon
+  var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
+
+  L.popup()
+    .setContent("Predicting weather for " + displayDate + "... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setLatLng(location)
+    .openOn(Map)
+
+  $.ajax("/api/predictConditions/" + lat + "," + lon + "," + month + "," + day, {
+    dataType: "json",
+    success: function(data, status, jqXhr) {
+      gotFutureConditions(location, data, status, jqXhr, displayDate)
+    },
+    error: function() {
+      L.popup()
+        .setContent("Error predicting weather for " + displayDate + ", sorry!")
+        .setLatLng(location)
+        .openOn(Map)
+    }
+  })
+}
+
+//------------------------------------------------------------------------------
+// Take returned weather prediction and parse it for display
+function gotFutureConditions(location, data, status, jqXhr, dateString) {
+  try {
+    var noDataAvailable = false;
+    if (data.status === "failure") noDataAvailable = true
+
+    var condition = [data.avgTemp, data.frequentCondition, data.iconCode]
+
+    // If no historical data was available, throw error
+    // Otherwise, configure the pop-up window to display the data
+    if (noDataAvailable)
+    {
+      throw "No historical data available for " + dateString + ", sorry!"
+    }
+    else
+      showWeatherForDate(true, location, condition, dateString, data.startYear, data.endYear)
+  }
+  // If no past results were available or error parsing, print message on pop-up
+  catch(e) {
+    var errMsg;
+    if (typeof e === 'string')
+      errMsg = e;
+    else
+    {
+      errMsg = "Error predicting weather for " + dateString + ", sorry!"
+    }
+    L.popup()
+      .setContent(errMsg)
+      .setLatLng(location)
+      .openOn(Map)
+    }
+}
+
+//------------------------------------------------------------------------------
+// Gets the weather for the input past date
+function getPastDateData(location) {
+  var month = document.getElementById('monthInput').value
+  var day = document.getElementById('dayInput').value
+  var year = document.getElementById('yearInput').value
+  var lat = location.lat
+  var lon = location.lon
+  var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
+
+  L.popup()
+    .setContent("Getting weather data for " + displayDate + "... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setLatLng(location)
+    .openOn(Map)
+
+  $.ajax("/api/pastConditions/" + lat + "," + lon + "," + month + "," + day + "," + year, {
+    dataType: "json",
+    success: function(data, status, jqXhr) {
+      gotPastConditions(location, data, status, jqXhr, displayDate)
+    },
+    error: function() {
+      L.popup()
+        .setContent("Error getting weather data for " + displayDate + ", sorry!")
+        .setLatLng(location)
+        .openOn(Map)
+    }
+  })
+}
+
+//------------------------------------------------------------------------------
+// Take returned past conditions and parse them for display
+function gotPastConditions(location, data, status, jqXhr, dateString) {
+  try {
+    gotPastConditions_(location, data, status, jqXhr, dateString)
+  }
+  // If no past results were available or error parsing, print message on pop-up
+  catch(e) {
+    var errMsg;
+    if (typeof e === 'string')
+      errMsg = e;
+    else
+    {
+      errMsg = "Error getting weather data for " + dateString + ", sorry!"
+    }
+    L.popup()
+      .setContent(errMsg)
+      .setLatLng(location)
+      .openOn(Map)
+    }
+}
+
+//------------------------------------------------------------------------------
+function gotPastConditions_(location, data, status, jqXhr, dateString) {
+  // If there was no data available for this date, show error
+  var noDataAvailable = false;
+  if (data.errors) noDataAvailable = true
+
+  // If the observation doesn't have the necessary attributes, show error
+  var obs = data.observations[0]
+  if (null == obs) noDataAvailable = true
+  if (null == obs.temp) noDataAvailable = true
+  if (null == obs.wx_phrase) obs.wx_phrase = "Unknown"
+
+  var condition = [obs.temp, obs.wx_phrase, obs.wx_icon]
+
+  // If no historical data was available, throw error
+  // Otherwise, configure the pop-up window to display the data
+  if (noDataAvailable)
+  {
+    throw "No historical data available for " + dateString + ", sorry!"
+  }
+  else
+    showWeatherForDate(false, location, condition, dateString)
+}
+
+//------------------------------------------------------------------------------
+// Shows the weather for a particular input date
+function showWeatherForDate(showPrediction, location, condition, dateString, startYear, endYear) {
+  Map.closePopup()
+
+  var icon = code2icon(condition[2])
+  var weather = [
+      "<strong>Temperature: </strong> " + condition[0] + "" + "&deg; F<br>",
+      "<strong>Conditions: </strong> " + condition[1] + "<br><br>",
+      "<i class='wi " + icon + "'></i>"
+  ]
+  weather = weather.join("\n")
+
+  var descriptor = (showPrediction) ? "will be" : "was"
+  var desc = "<p>The weather on " + dateString + " " + descriptor + ":</p>"
+
+  var predictionDates
+  if (showPrediction)
+    predictionDates = "<p>Prediction based on data from " + startYear.toString() + " to " + endYear.toString()
+  else
+    predictionDates = ""
+
+  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + weather + predictionDates
+
+  L.popup()
+    .setContent(popupHTML)
+    .setLatLng(location)
+    .openOn(Map)
 }
 
 //------------------------------------------------------------------------------
@@ -287,6 +517,7 @@ function showHistory(location, history) {
   table = table.join("\n")
 
   var desc = "<p>Conditions on this day in previous years:"
+
   var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + table
 
   L.popup()
