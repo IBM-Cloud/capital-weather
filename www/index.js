@@ -22,6 +22,8 @@ if (location.hostname == "localhost") {
 
 //------------------------------------------------------------------------------
 function onLoad() {
+  setTimeout(hidePreloadedIcons, 1000)
+
   Map = L.map("map", {
     doubleClickZoom: false
   })
@@ -109,6 +111,11 @@ function onLoad() {
     { lat: 38.55, lon: -121.46 }, // california
   ]
   Map.fitBounds(bounds, {padding:[0,0]})
+}
+
+//------------------------------------------------------------------------------
+function hidePreloadedIcons() {
+  $("#icon-preload").hide()
 }
 
 //------------------------------------------------------------------------------

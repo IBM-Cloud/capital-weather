@@ -6,7 +6,8 @@ function getHelpHTML() {
 
   html.push("<h3>capital weather</h3>")
 
-  html.push("<p>This Bluemix application displays the weather in")
+  html.push("<p>This Bluemix application uses an upcoming weather service")
+  html.push("to display the weather in")
   html.push("capitals around the world, and US state capitals.")
 
   html.push("<p>Click on a weather icon to see detailed weather information")
