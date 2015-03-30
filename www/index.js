@@ -17,7 +17,7 @@ $(onLoad)
 // If on local, only use 1st city for debugging
 Locations = getLocations()
 if (location.hostname == "localhost") {
-  Locations = Locations.slice(0,10)
+  // Locations = Locations.slice(0,10)
 }
 
 //------------------------------------------------------------------------------
@@ -177,6 +177,8 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     "<p><button class='button' onclick='" + onPastDateClick + "'>Get Past Day's Weather</button></p>",
     "<p><button class='button' onclick='" + onFutureDateClick + "'>Predict Future Day's Weather</button></p>"
   ].join("\n")
+
+  buttons = ""
 
   var icon = L.divIcon({
     html:      "<i class='wi " + icon + "'></i>",
