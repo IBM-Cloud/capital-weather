@@ -41,8 +41,8 @@ html, body {
   text-shadow: 0px 0px 10px #DDD;
 }
 
-.wi.wi-sleet, .wi.wi-cloudy {
-  color:                    #00F;
+.wi.wi-cloudy {
+  color:                    #444;
   text-shadow: 0px 0px 10px #FFF;
 }
 
@@ -51,7 +51,7 @@ html, body {
   text-shadow: 0px 0px 10px #FFF;
 }
 
-.wi.wi-snow, .wi.wi-hail {
+.wi.wi-snow, .wi.wi-hail, .wi.wi-sleet {
   color:                    #FFF;
   text-shadow: 0px 0px 10px #000;
 }
