@@ -5,6 +5,10 @@ html, body {
   height: 100%;
 }
 
+.leaflet-container a.leaflet-popup-close-button {
+  font-size: 150%;
+}
+
 #map {
   width:  100%;
   height: 100%;
