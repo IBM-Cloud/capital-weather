@@ -33,7 +33,7 @@ function onLoad() {
     var marker = L.marker(location, {
       title:   location.name,
       alt:     location.name,
-      opacity: 0
+      opacity: 1
     })
 
     location.marker = marker
@@ -94,7 +94,7 @@ function onLoad() {
     var marker = L.marker(location, {
       title:   location.name,
       alt:     location.name,
-      opacity: 0
+      opacity: 1
     })
 
     location.marker = marker
@@ -147,8 +147,8 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var wspd = "???"
 
   if (observation.imperial) {
-    temp = observation.imperial.temp + "&deg; F"
-    wspd = observation.imperial.wspd + " mph"
+    temp = getTempString(observation.imperial.temp)
+    wspd = getSpeedString(observation.imperial.wspd)
   }
 
   var uv_index  = observation.uv_index
@@ -190,6 +190,26 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   marker.setIcon(icon)
   marker.bindPopup(popupText)
   marker.setOpacity(1)
+}
+
+//------------------------------------------------------------------------------
+function getTempString(tempF) {
+  tempF = parseInt(tempF, 10)
+  if (isNaN(tempF)) return "???"
+
+  var tempC = Math.round((tempF - 32) * 5 / 9)
+
+  return "" + tempC + "&deg; C / " + tempF + "&deg; F"
+}
+
+//------------------------------------------------------------------------------
+function getSpeedString(mph) {
+  mph = parseInt(mph, 10)
+  if (isNaN(mph)) return "???"
+
+  var kph = Math.round(mph * 1.6)
+
+  return "" + kph + " kph / " + mph + " mph"
 }
 
 //------------------------------------------------------------------------------
