@@ -1,0 +1,13 @@
+{
+  "services": {
+    "user-provided": [
+      {
+        "name":  "weather-service",
+        "credentials": {
+          "apiKey": "your_api_key_here",
+          "url":    "http://api.weather.com"
+        }
+      }
+    ]
+  }
+}
