@@ -80,30 +80,22 @@ This command will trigger [`cake`][cake_url] to build and start your application
 Since we are using `cake`, the app is rebuilt continuously as changes are made to the local file system. Therefore, you do not have to constantly stop and restart your app as you develop locally. Run `npm run cake` to see the other commands available in the `Cakefile`.
 
 ## Decomposition Instructions
-The primary purpose of this demo is to provide a sample implementation of the Weather Channel API. The relevant code for this integration is located within the `lib/weatherService.js` file. This section details how developers can reuse this code:
+The primary purpose of this demo is to provide a sample implementation of the Weather Channel API. The relevant code for this integration is located within the `lib/weatherService.js` file and has been extracted into several [source gists][gist_url]. This section details the callback functions created to call this API.
 
 ### Current Conditions
 
-A callback function for getting the current weather conditions for the input latitude/longitude value.
-
-<script src="https://gist.github.com/JakePeyser/5c50c5d06106d54eb058.js?file=getCurrentConditions.js"></script>
+A callback function for getting the current weather conditions for the input latitude/longitude value. Utilizes the `current` method of the Weather Channel API.
 
 ### Past Conditions
 
-A callback function for getting the weather conditions on a prior date for the input latitude/longitude value.
-
-<script src="https://gist.github.com/JakePeyser/5c50c5d06106d54eb058.js?file=getPastConditions.js"></script>
-
-<script src="https://gist.github.com/JakePeyser/5c50c5d06106d54eb058.js?file=getOneHC.js"></script>
+A callback function for getting the weather conditions on a prior date for the input latitude/longitude value. This function leverages the `getOneHC` helper method. Utilizes the `historical` method of the Weather Channel API.
 
 ### Historical Conditions
 
-A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This utilizes the `getOneHC` function from the code above.
-
-<script src="https://gist.github.com/JakePeyser/5c50c5d06106d54eb058.js?file=getHistoricalConditions.js"></script>
+A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This function makes several calls to the `getOneHC` helper method. Utilizes the `current` method of the Weather Channel API.
 
 ## Contribute
-We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues][issues_url] section or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
+We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
 
 ## Troubleshooting
 
@@ -135,4 +127,5 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [cloud_foundry_url]: https://github.com/cloudfoundry/cli
 [download_node_url]: https://nodejs.org/download/
 [cake_url]: http://coffeescript.org/#cake
+[gist_url]: https://gist.github.com/JakePeyser/5c50c5d06106d54eb058
 [issues_url]: https://github.com/IBM-Bluemix/capital-weather/issues
