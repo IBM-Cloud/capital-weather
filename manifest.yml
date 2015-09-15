@@ -1,7 +1,11 @@
 ---
-
 applications:
-- name:      capital-weather
-  host:      capital-weather
-  memory:    256M
-  command:   node app
+- name:       capital-weather
+  host:       capital-weather
+  path:       .
+  domain:     mybluemix.net
+  instances:  1
+  memory:     256M
+  buildpack:  liberty-for-java
+  command:    node app
+  buildpack:  sdk-for-nodejs
