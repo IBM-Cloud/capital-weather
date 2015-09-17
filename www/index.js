@@ -273,7 +273,6 @@ function getCurrentConditions(location) {
 function gotCurrentConditions(location, data, status, jqXhr) {
   var observation = data.observation
   if (null == observation) return
-
   var icon_code = observation.icon_code
   var icon = code2icon(icon_code)
 
@@ -319,7 +318,7 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     className: "location-icon"
   })
 
-  var popupText = "<h4>" + location.name + "</h4><p>" + table + buttons
+  var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table + buttons
 
   var marker = location.marker
   marker.setIcon(icon)
@@ -413,7 +412,7 @@ function getFutureDateData(location) {
   var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
 
   L.popup()
-    .setContent("Predicting weather for " + displayDate + "... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setContent("Predicting weather for " + displayDate + "... <br><center><img src='images/spiffygif.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -476,7 +475,7 @@ function getPastDateData(location) {
   var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
 
   L.popup()
-    .setContent("Getting weather data for " + displayDate + "... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setContent("Getting weather data for " + displayDate + "... <br><center><img src='images/spiffygif.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -545,6 +544,9 @@ function gotPastConditions_(location, data, status, jqXhr, dateString) {
 function showWeatherForDate(showPrediction, location, condition, dateString, startYear, endYear) {
   Map.closePopup()
 
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
+  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
+
   var temp = getTempString(condition[0]);
   var icon = code2icon(condition[2]);
   var weather = [
@@ -561,7 +563,7 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   var predictionDates = (showPrediction) ? "<p>Based on data from " + startYear.toString() + " to " + endYear.toString() + ", we predict the" : "<p>The";
   var desc = predictionDates + " weather on " + dateString + " " + descriptor + ":</p>";
 
-  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup
+  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup
 
   L.popup()
     .setContent(popupHTML)
@@ -575,7 +577,7 @@ function getHistoricConditions(location) {
   var lon = location.lon
 
   L.popup()
-    .setContent("Getting historical data... <br><center><img src='spiffygif_30x30.gif'><center>")
+    .setContent("Getting historical data... <br><center><img src='images/spiffygif.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -650,6 +652,9 @@ function gotHistoricConditions_(location, data, status, jqXhr) {
 function showHistory(location, history) {
   Map.closePopup()
 
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
+  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
+
   var table = [
     "<table>",
       "<tr><td><strong>Year</strong> <td class='td-indent'><strong>Temp</strong> <td class='td-indent'><strong>Conditions</strong>",
@@ -672,7 +677,7 @@ function showHistory(location, history) {
 
   var desc = "<p>Conditions on this day in previous years:"
 
-  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + table
+  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + table
 
   L.popup()
     .setContent(popupHTML)
@@ -700,6 +705,11 @@ function getIconZoom(zoomLevel) {
   else if (zoomLevel > 7) {
     return "wi-size-xxl";
   }
+}
+
+//------------------------------------------------------------------------------
+function goBack(locationName) {
+  $("div[title='" + locationName + "']").click();
 }
 
 //------------------------------------------------------------------------------

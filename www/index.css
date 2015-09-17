@@ -7,6 +7,25 @@ html, body {
 
 .leaflet-container a.leaflet-popup-close-button {
   font-size: 150%;
+  padding-right: 20px;
+  padding-top: 5px;
+}
+
+.back-arrow {
+  width: 17px;
+  display: inline-block;
+  margin-left: -16px;
+  margin-top: -20px;
+  opacity: .6;
+}
+
+.back-arrow:hover {
+  width: 17px;
+  display: inline-block;
+  margin-left: -16px;
+  margin-top: -20px;
+  opacity: 1;
+  cursor: pointer;
 }
 
 #map {
@@ -17,6 +36,10 @@ html, body {
 .info {
   background-color: #DDD;
   padding:          1.0em 1.0em;
+}
+
+.popup-header {
+  margin-top: 0px;
 }
 
 .history-row {
