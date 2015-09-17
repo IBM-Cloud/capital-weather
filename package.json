@@ -21,7 +21,8 @@
     "hapi":             "8.4.x",
     "lru-cache":        "2.5.x",
     "request":          "2.51.x",
-    "underscore":       "1.7.x"
+    "underscore":       "1.7.x",
+    "cf-deployment-tracker-client": "*"
   },
   "devDependencies": {
     "bower":            "1.3.x",

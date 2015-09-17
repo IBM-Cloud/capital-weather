@@ -6,6 +6,5 @@ applications:
   domain:     mybluemix.net
   instances:  1
   memory:     256M
-  buildpack:  liberty-for-java
   command:    node app
   buildpack:  sdk-for-nodejs

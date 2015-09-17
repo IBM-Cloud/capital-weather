@@ -1,6 +1,6 @@
 # Capital Weather Overview
 
-Capital Weather is a sample Bluemix application which utilizes the [Weather Channel][weather_api_url] service along with two mapping APIs, [Leaflet][leaflet_url] and [Esri Leaflet][esri_leaflet_url]. It allows users to visualize the current weather in all the world capitals, as well as obtain historical weather data and future weather projections. The app provides a real world use case of the Weather Channel API and implements several of the methods exposed by that interface.
+Capital Weather is a sample Bluemix application which utilizes the [Weather Channel][weather_api_url] service, two mapping APIs, [Leaflet][leaflet_url] and [Esri Leaflet][esri_leaflet_url], and the [Google Maps Geocoding API][geocoding_api_url]. It allows users to visualize the current weather in all the world capitals, as well as obtain historical weather data and future weather projections. The app provides a real world use case of the Weather Channel API and implements several of the methods exposed by that interface.
 
 ## Running the app on Bluemix
 [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
@@ -129,3 +129,4 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [cake_url]: http://coffeescript.org/#cake
 [gist_url]: https://gist.github.com/JakePeyser/5c50c5d06106d54eb058
 [issues_url]: https://github.com/IBM-Bluemix/capital-weather/issues
+[geocoding_api_url]: https://developers.google.com/maps/documentation/geocoding/intro

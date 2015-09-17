@@ -10,6 +10,8 @@
 
 var Map
 var Help
+var geocoder = new google.maps.Geocoder
+var curZoom;
 
 $(onLoad)
 
@@ -17,12 +19,20 @@ $(onLoad)
 // If on local, only use 1st city for debugging
 Locations = getLocations()
 if (location.hostname == "localhost") {
-  // Locations = Locations.slice(0,10)
+   Locations = Locations.slice(0,10)
 }
 
 //------------------------------------------------------------------------------
 function onLoad() {
-  setTimeout(hidePreloadedIcons, 1000)
+  setTimeout(hidePreloadedIcons, 5000)
+
+  // Inject 'Fork me on GitHub' banner into map UI
+  setTimeout(function(){
+    var forkHtml = "<a href=\"https://github.com/IBM-Bluemix/capital-weather\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67\" alt=\"Fork me on GitHub\" data-canonical-src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\"></a>"
+    var forkNode = document.createElement("div");
+    forkNode.innerHTML = forkHtml;
+    $(".leaflet-control-container")[0].appendChild(forkNode);
+  }, 1000);
 
   Map = L.map("map", {
     doubleClickZoom: false
@@ -96,13 +106,37 @@ function onLoad() {
     var marker = L.marker(location, {
       title:   location.name,
       alt:     location.name,
-      opacity: 1
+      opacity: 0
     })
 
     location.marker = marker
     marker.addTo(Map)
 
+    getLocationName(e.latlng.lat, e.latlng.lng, location)
     getCurrentConditions(location)
+  })
+
+  Map.on("zoomend", function(e) {
+    // Get the corresponding css class for the current zoom level
+    curZoom = getIconZoom(e.target._zoom);
+
+    // Determine the old zoom
+    var icons = document.getElementsByClassName("wi");
+    var oldZoom;
+    if (icons[0].classList.contains("wi-size-xs")) oldZoom = "wi-size-xs";
+    if (icons[0].classList.contains("wi-size-s")) oldZoom = "wi-size-s";
+    if (icons[0].classList.contains("wi-size-m")) oldZoom = "wi-size-m";
+    if (icons[0].classList.contains("wi-size-l")) oldZoom = "wi-size-l";
+    if (icons[0].classList.contains("wi-size-xl")) oldZoom = "wi-size-xl";
+    if (icons[0].classList.contains("wi-size-xxl")) oldZoom = "wi-size-xxl";
+
+    // Resize icons to new zoom level
+    for (var i=0; i < icons.length; i++) {
+      if (!icons[i].classList.contains("wi-popup")) {
+        icons[i].classList.remove(oldZoom);
+        icons[i].classList.add(curZoom);
+      }
+    }
   })
 
   // fit map to initial bounds
@@ -124,6 +158,72 @@ function displayHelp(location) {
   Help
     .setLatLng(Map.getCenter())
     .openOn(Map)
+}
+
+//------------------------------------------------------------------------------
+// Retrieves the corresponding city/state/country for the input lat/lon
+function getLocationName(lat, lon, loc) {
+  var latlng = {lat: lat, lng: lon};
+  geocoder.geocode({'location': latlng}, function(results, status) {
+    if (status === google.maps.GeocoderStatus.OK) {
+      var city, state, county, municipality, country = null;
+      if (results[0]) {
+        for (var i=0; i < results.length; i++) {
+          var components = results[0].address_components;
+          for (var j=0; j < components.length; j++) {
+            if (components[j].types.indexOf("locality") != -1) {
+              city = components[j].long_name;
+              continue;
+            }
+            else if (components[j].types.indexOf("administrative_area_level_1") != -1) {
+              state = components[j].long_name;
+              continue;
+            }
+            else if (components[j].types.indexOf("administrative_area_level_2") != -1) {
+              county = components[j].long_name;
+              continue;
+            }
+            else if (components[j].types.indexOf("administrative_area_level_3") != -1) {
+              municipality = components[j].long_name;
+              continue;
+            }
+            else if (components[j].types.indexOf("country") != -1) {
+              country = components[j].long_name;
+              continue;
+            }
+          }
+          if (city && state && country)
+            break;
+        }
+
+        if (country === "United States") {
+          if (city)
+            loc.name = loc.marker.title = loc.marker.alt = (city + ", " + state);
+          else if (county)
+            loc.name = loc.marker.title = loc.marker.alt = (county + ", " + state);
+        }
+        else if (country === "Canada") {
+          if (city)
+            loc.name = loc.marker.title = loc.marker.alt = (city + ", " + state);
+          else if (municipality)
+            loc.name = loc.marker.title = loc.marker.alt = (municipality + ", " + state);
+          else if (state)
+            loc.name = loc.marker.title = loc.marker.alt = (state + ", " + country);
+        }
+        else if (country)
+          if (city)
+            loc.name = loc.marker.title = loc.marker.alt =  (city + ", " + country);
+          else
+            loc.name = loc.marker.title = loc.marker.alt =  (state + ", " + country);
+      }
+      else {
+        console.error('No results found for reverse geocoding');
+      }
+    }
+    else {
+      console.error('Geocoder failed due to: ' + status);
+    }
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -186,7 +286,7 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   ].join("\n")
 
   var icon = L.divIcon({
-    html:      "<i class='wi " + icon + "'></i>",
+    html:      "<i class='wi " + icon + " " + curZoom + "'></i>",
     iconSize:  [64,64],
     className: "location-icon"
   })
@@ -417,11 +517,13 @@ function gotPastConditions_(location, data, status, jqXhr, dateString) {
 function showWeatherForDate(showPrediction, location, condition, dateString, startYear, endYear) {
   Map.closePopup()
 
+  var temp = getTempString(condition[0]);
+
   var icon = code2icon(condition[2])
   var weather = [
-      "<strong>Temperature: </strong> " + condition[0] + "" + "&deg; F<br>",
+      "<strong>Temperature: </strong> " + temp + "<br>",
       "<strong>Conditions: </strong> " + condition[1] + "<br><br>",
-      "<i class='wi " + icon + "'></i>"
+      "<i class='wi " + icon + " wi-size-m wi-popup'></i>"
   ]
   weather = weather.join("\n")
 
@@ -529,12 +631,12 @@ function showHistory(location, history) {
   ]
 
   history.forEach(function(data){
-    var year  = data[0]
-    var temp  = data[1] + "&deg; F"
-    var cond  = data[2]
+    var year  = data[0];
+    var temp  = getTempString(data[1]);
+    var cond  = data[2];
     var entry = "<tr><td>" + year +
                 "<td class='td-indent'>" + temp +
-                "<td class='td-indent'>" + cond
+                "<td class='td-indent'>" + cond;
 
     table.push(entry)
   })
@@ -551,6 +653,28 @@ function showHistory(location, history) {
     .setContent(popupHTML)
     .setLatLng(location)
     .openOn(Map)
+}
+
+//------------------------------------------------------------------------------
+function getIconZoom(zoomLevel) {
+  if (zoomLevel < 4) {
+    return "wi-size-xs";
+  }
+  else if (zoomLevel === 4) {
+    return "wi-size-s";
+  }
+  else if (zoomLevel === 5) {
+    return "wi-size-m";
+  }
+  else if (zoomLevel === 6) {
+    return "wi-size-l";
+  }
+  else if (zoomLevel === 7) {
+    return "wi-size-xl";
+  }
+  else if (zoomLevel > 7) {
+    return "wi-size-xxl";
+  }
 }
 
 //------------------------------------------------------------------------------

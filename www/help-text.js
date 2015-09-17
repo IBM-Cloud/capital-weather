@@ -4,33 +4,24 @@
 function getHelpHTML() {
   var html = []
 
-  html.push("<h3>capital weather</h3>")
+  html.push("<h3>Capital Weather</h3>")
 
-  html.push("<p>This application displays the weather in")
-  html.push("capitals around the world, and US state capitals.")
+  html.push("<p>This application displays the weather in all world capitals.")
 
-  html.push("<p>Click on a weather icon to see detailed weather information")
-  html.push("about that location.")
-  html.push("Double-click elsewhere on the map to see the weather in")
-  html.push("that location.")
+  html.push("<p><strong>Click</strong> on a weather icon to see detailed weather info")
+  html.push("for that location in both the past and present.")
+
+  html.push("<p><strong>Double click</strong> on any other location on the map")
+  html.push("to get the weather data for the corresponding city.")
 
   html.push("<p><strong>Note the links below are not yet fully operational.</strong>")
 
   html.push("<p>This application uses the")
-  html.push("<a href='https://bluemix.net' target='_blank'>Bluemix</a>")
-  html.push("FooBar service to obtain weather information.")
+  html.push("<a href='https://ibm.biz/capital-weather-demo-bluemix' target='_blank'>Bluemix</a>")
+  html.push("Weather Channel service to obtain weather information.")
   html.push("See the")
-  html.push("<a href='https://www.ng.bluemix.net/docs/#services/Cloudant/index.html#Cloudant' target='_blank'>FooBar service documentation</a>")
+  html.push("<a href='https://www.ng.bluemix.net/docs/#services/Cloudant/index.html#Cloudant' target='_blank'>documentation</a>")
   html.push("for more information about using this service in your Bluemix application.")
-
-  html.push("<p>The source for this application is available at")
-  html.push("<a href='https://github.com/IBM-Bluemix/capital-weather' target='_blank'>")
-  html.push("github.com/IBM-Bluemix/capital-weather")
-  html.push("</a>")
-
-  html.push("<p><a href='https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/capital-weather.git' target='_blank'>")
-  html.push("<img src='https://hub.jazz.net/deploy/button.png' alt='Bluemix button' />")
-  html.push("</a>")
 
   return html.join("\n")
 }
