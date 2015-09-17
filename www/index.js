@@ -412,7 +412,7 @@ function getFutureDateData(location) {
   var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
 
   L.popup()
-    .setContent("Predicting weather for " + displayDate + "... <br><center><img src='images/spiffygif.gif'><center>")
+    .setContent("Predicting weather for " + displayDate + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -475,7 +475,7 @@ function getPastDateData(location) {
   var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
 
   L.popup()
-    .setContent("Getting weather data for " + displayDate + "... <br><center><img src='images/spiffygif.gif'><center>")
+    .setContent("Getting weather data for " + displayDate + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
@@ -577,7 +577,7 @@ function getHistoricConditions(location) {
   var lon = location.lon
 
   L.popup()
-    .setContent("Getting historical data... <br><center><img src='images/spiffygif.gif'><center>")
+    .setContent("Getting historical data... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 

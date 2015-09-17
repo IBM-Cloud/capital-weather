@@ -97,6 +97,8 @@ A callback function for getting weather conditions for the past ten years on the
 ## Contribute
 We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
 
+Credit to [3rdculturekid][3rdculturekid_url] for the beautiful weather loading gif.
+
 ## Troubleshooting
 
 The primary source of debugging information for your Bluemix app is the logs. To see them, run the following command using the Cloud Foundry CLI:
@@ -130,3 +132,4 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [gist_url]: https://gist.github.com/JakePeyser/5c50c5d06106d54eb058
 [issues_url]: https://github.com/IBM-Bluemix/capital-weather/issues
 [geocoding_api_url]: https://developers.google.com/maps/documentation/geocoding/intro
+[3rdculturekid_url]: http://thethirdculturekid.com/
