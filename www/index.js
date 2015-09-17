@@ -89,6 +89,26 @@ function onLoad() {
 
   info.addTo(Map)
 
+  // add icon key box
+  var key = L.control({position: "bottomleft"})
+
+  Key = L.popup()
+    .setContent(getKeyHTML())
+
+  key.onAdd = function (map) {
+    var div = L.DomUtil.create("div")
+
+    div.innerHTML = "<button id='key-button' type='button' class='btn btn-default'>Key</button>"
+
+    $(document).on( "click", "#key-button", function() {
+      displayKey()
+    })
+
+    return div
+  }
+
+  key.addTo(Map)
+
 //  if (!localStorage.firstTime) {
 //    localStorage.firstTime = false
 
@@ -156,6 +176,14 @@ function hidePreloadedIcons() {
 // Displays the help text box in the center of the web page
 function displayHelp(location) {
   Help
+    .setLatLng(Map.getCenter())
+    .openOn(Map)
+}
+
+//------------------------------------------------------------------------------
+// Displays the key box in the center of the web page
+function displayKey(location) {
+  Key
     .setLatLng(Map.getCenter())
     .openOn(Map)
 }
@@ -272,10 +300,10 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   var onFutureDateClick = "javascript:enterDate(" + loc + ", true)"
   var table = [
     "<table>",
-      "<tr><td>Conditions:  <td class='td-indent'>" + desc,
-      "<tr><td>Temperature: <td class='td-indent'>" + temp,
-      "<tr><td>Wind Speed:  <td class='td-indent'>" + wspd,
-      "<tr><td>UV Index:    <td class='td-indent'>" + uv_phrase,
+      "<tr><td class='weather-data-row'><strong>Conditions: </strong><td class='td-indent'>" + desc,
+      "<tr><td class='weather-data-row'><strong>Temperature: </strong><td class='td-indent'>" + temp,
+      "<tr><td class='weather-data-row'><strong>Wind Speed: </strong><td class='td-indent'>" + wspd,
+      "<tr><td class='weather-data-row'><strong>UV Index: </strong><td class='td-indent'>" + uv_phrase,
     "</table>"
   ].join("\n")
 
@@ -518,25 +546,22 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   Map.closePopup()
 
   var temp = getTempString(condition[0]);
-
-  var icon = code2icon(condition[2])
+  var icon = code2icon(condition[2]);
   var weather = [
-      "<strong>Temperature: </strong> " + temp + "<br>",
-      "<strong>Conditions: </strong> " + condition[1] + "<br><br>",
-      "<i class='wi " + icon + " wi-size-m wi-popup'></i>"
+    "<table>",
+      "<tr><td class='weather-data-row'><strong>Conditions: </strong><td class='td-indent'>" + condition[1],
+      "<tr><td class='weather-data-row'><strong>Temperature: </strong><td class='td-indent'>" + temp,
+    "</table>"
   ]
   weather = weather.join("\n")
 
-  var descriptor = (showPrediction) ? "will be" : "was"
-  var desc = "<p>The weather on " + dateString + " " + descriptor + ":</p>"
+  var iconMarkup = "<i class='wi " + icon + " wi-size-m wi-popup'></i>";
 
-  var predictionDates
-  if (showPrediction)
-    predictionDates = "<p>Prediction based on data from " + startYear.toString() + " to " + endYear.toString()
-  else
-    predictionDates = ""
+  var descriptor = (showPrediction) ? "will be" : "was";
+  var predictionDates = (showPrediction) ? "<p>Based on data from " + startYear.toString() + " to " + endYear.toString() + ", we predict the" : "<p>The";
+  var desc = predictionDates + " weather on " + dateString + " " + descriptor + ":</p>";
 
-  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + weather + predictionDates
+  var popupHTML = "<h4>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup
 
   L.popup()
     .setContent(popupHTML)
@@ -634,7 +659,7 @@ function showHistory(location, history) {
     var year  = data[0];
     var temp  = getTempString(data[1]);
     var cond  = data[2];
-    var entry = "<tr><td>" + year +
+    var entry = "<tr><td class='history-row'>" + year +
                 "<td class='td-indent'>" + temp +
                 "<td class='td-indent'>" + cond;
 
