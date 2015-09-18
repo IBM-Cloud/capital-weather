@@ -307,9 +307,9 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   ].join("\n")
 
   var buttons = [
-    "<p><button class='button' onclick='" + onHistoryClick + "'>Display Historical Data</button></p>",
-    "<p><button class='button' onclick='" + onPastDateClick + "'>Get Past Day's Weather</button></p>",
-    "<p><button class='button' onclick='" + onFutureDateClick + "'>Predict Future Day's Weather</button></p>"
+    "<img class='date_img' alt='Weather on a past date' title='Weather on a past date' src='images/date_icon.png' onclick='" + onPastDateClick + "'></img>",
+    "<img class='history_img' alt='Weather on this date in history' title='Weather on this date in history' src='images/history_icon.png' onclick='" + onHistoryClick + "'></img>",
+    "<img class='predict_img' alt='Predict weather on a future date' title='Predict weather on a future date' src='images/predict_icon.png' onclick='" + onFutureDateClick + "'></img>"
   ].join("\n")
 
   var icon = L.divIcon({

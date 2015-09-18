@@ -94,11 +94,6 @@ A callback function for getting the weather conditions on a prior date for the i
 
 A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This function makes several calls to the `getOneHC` helper method. Utilizes the `current` method of the Weather Channel API.
 
-## Contribute
-We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
-
-Credit to [3rdculturekid][3rdculturekid_url] for the beautiful weather loading gif.
-
 ## Troubleshooting
 
 The primary source of debugging information for your Bluemix app is the logs. To see them, run the following command using the Cloud Foundry CLI:
@@ -107,6 +102,14 @@ The primary source of debugging information for your Bluemix app is the logs. To
   $ cf logs capital-weather --recent
   ```
 For more detailed information on troubleshooting your application, see the [Troubleshooting section](https://www.ng.bluemix.net/docs/troubleshoot/tr.html) in the Bluemix documentation.
+
+## Contribute
+We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
+
+### Credit
+[3rdculturekid][3rdculturekid_url] - weather loading gif [[source]][weather_loading_gif_url]  
+[designmodo][design_modo_url] - historical weather data icon [[source]][history_icon_url][[license]][creative_commons_url]  
+[Lin Pham][linh_pham_url] - past and future weather data icons [[source]][past_future_icon_url]
 
 ## Privacy Notice
 The capital-weather sample web application includes code to track deployments to Bluemix and other Cloud Foundry platforms. The following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service on each deployment:
@@ -120,7 +123,7 @@ This data is collected from the VCAP_APPLICATION environment variable in IBM Blu
 
 ### Disabling Deployment Tracking
 
-Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `lib/server.js` file.
+Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `app.js` file.
 
 [weather_api_url]: http://www.wunderground.com/weather/api/
 [leaflet_url]: http://leafletjs.com/
@@ -133,3 +136,9 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [issues_url]: https://github.com/IBM-Bluemix/capital-weather/issues
 [geocoding_api_url]: https://developers.google.com/maps/documentation/geocoding/intro
 [3rdculturekid_url]: http://thethirdculturekid.com/
+[weather_loading_gif_url]:https://dribbble.com/shots/1099769-Google-Weather-GIF
+[design_modo_url]: http://designmodo.com/
+[history_icon_url]: https://www.iconfinder.com/icons/115762/calendar_date_event_month_icon
+[creative_commons_url]: http://creativecommons.org/licenses/by/3.0/legalcode
+[linh_pham_url]: http://linhpham.me/
+[past_future_icon_url]: https://www.iconfinder.com/icons/284198/backup_circle_history_machine_recent_time_icon
