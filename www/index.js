@@ -17,7 +17,7 @@ var datePicker;
 $(onLoad)
 
 // Get capital cities from locations.js file
-// If on local, only use 1st city for debugging
+// If running locally, only use 1st 10 cities for debugging
 Locations = getLocations()
 if (location.hostname == "localhost") {
    Locations = Locations.slice(0,10)
@@ -70,51 +70,16 @@ function onLoad() {
 
   L.control.layers(baseMaps).addTo(Map)
 
-  // add help info box
-  var info = L.control({position: "bottomleft"})
-
+  // Create the help buttons in bottom-left of map
   Help = L.popup()
     .setContent(getHelpHTML())
-
-  info.onAdd = function (map) {
-    var div = L.DomUtil.create("div")
-
-    div.innerHTML = "<button id='help-button' type='button' class='btn btn-default'>Help</button>"
-
-    $(document).on( "click", "#help-button", function() {
-      displayHelp()
-    })
-
-    return div
-  }
-
-  info.addTo(Map)
-
-  // add icon key box
-  var key = L.control({position: "bottomleft"})
+  createHelpBtn("help", "Help", displayHelp);
 
   Key = L.popup()
     .setContent(getKeyHTML())
+  createHelpBtn("key", "Key", displayKey);
 
-  key.onAdd = function (map) {
-    var div = L.DomUtil.create("div")
-
-    div.innerHTML = "<button id='key-button' type='button' class='btn btn-default'>Key</button>"
-
-    $(document).on( "click", "#key-button", function() {
-      displayKey()
-    })
-
-    return div
-  }
-
-  key.addTo(Map)
-
-//  if (!localStorage.firstTime) {
-//    localStorage.firstTime = false
-
-    setTimeout(displayHelp, 1000)
-//  }
+  setTimeout(displayHelp, 1000);
 
   // Gets the current weather conditions on the location clicked
   Map.on("dblclick", function(e) {
@@ -173,6 +138,24 @@ function onLoad() {
 }
 
 //------------------------------------------------------------------------------
+function createHelpBtn(bttnId, text, displayFunc) {
+  var helpBtn = L.control({position: "bottomleft"})
+
+  helpBtn.onAdd = function (map) {
+    var div = L.DomUtil.create("div")
+
+    div.innerHTML = "<button id='" + bttnId + "-button' type='button' class='btn btn-default'>" + text + "</button>"
+
+    $(document).on( "click", "#" + bttnId + "-button", function() {
+      displayFunc()
+    })
+
+    return div
+  }
+  helpBtn.addTo(Map)
+}
+
+//------------------------------------------------------------------------------
 function destroyDatepicker() {
   if (datePicker) {
     datePicker.datepicker("hide");
@@ -188,7 +171,7 @@ function hidePreloadedIcons() {
 
 //------------------------------------------------------------------------------
 // Displays the help text box in the center of the web page
-function displayHelp(location) {
+var displayHelp = function displayHelp(location) {
   Help
     .setLatLng(Map.getCenter())
     .openOn(Map)
@@ -196,7 +179,7 @@ function displayHelp(location) {
 
 //------------------------------------------------------------------------------
 // Displays the key box in the center of the web page
-function displayKey(location) {
+var displayKey = function displayKey(location) {
   Key
     .setLatLng(Map.getCenter())
     .openOn(Map)
