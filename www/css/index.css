@@ -15,6 +15,10 @@ html, body {
   padding-top: 5px;
 }
 
+.leaflet-popup-content p {
+  margin-top: 0px;
+}
+
 .back-arrow {
   width: 17px;
   display: inline-block;
@@ -73,6 +77,10 @@ html, body {
 
 .td-indent {
   padding-left: 1em;
+}
+
+.td-history {
+  padding-left: 20px;
 }
 
 .key-icon {

@@ -12,6 +12,7 @@ var Map
 var Help
 var geocoder = new google.maps.Geocoder
 var curZoom;
+var datePicker;
 
 $(onLoad)
 
@@ -159,12 +160,25 @@ function onLoad() {
     }
   })
 
+  Map.on("popupclose", function(e) {
+    destroyDatepicker();
+  });
+
   // fit map to initial bounds
   var bounds = [
     { lat: 44.32, lon:  -69.76 }, // maine
     { lat: 38.55, lon: -121.46 }, // california
   ]
   Map.fitBounds(bounds, {padding:[0,0]})
+}
+
+//------------------------------------------------------------------------------
+function destroyDatepicker() {
+  if (datePicker) {
+    datePicker.datepicker("hide");
+    datePicker.datepicker("destroy");
+    datePicker = null;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -349,49 +363,33 @@ function getSpeedString(mph) {
 //------------------------------------------------------------------------------
 // Instructs the user to enter a date so they can get past/future weather data
 function enterDate(location, getFuture) {
+
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
+  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
+
   var loc = JSON.stringify({
     lat:  location.lat,
     lon:  location.lon,
     name: location.name
   })
 
-  var curDate = new Date(),
-      curYear = curDate.getYear() + 1900,
-      curMonth = curDate.getMonth() + 1,
-      curDay = curDate.getDate();
-
   // Sets the pop up text based on if getting past or future date
   var instructions, minMonth, maxMonth, minDay, maxDay, minYear, maxYear, onDateClick, buttonText;
-  if (getFuture)
-  {
-    instructions = "Input a future date to predict the weather"
-    minMonth = 1
-    maxMonth = 12
-    minDay = 1
-    maxDay = 31
-    minYear = curYear
-    maxYear = 3000
+  if (getFuture) {
+    instructions = "Select a future date to predict the weather on that day"
     onDateClick = "javascript:getFutureDateData(" + loc + ")"
-    buttonText = "Predict the Weather"
+    buttonText = "Predict"
   }
-  else
-  {
-    instructions = "Input a past date to get the historical weather data"
-    minMonth = 1
-    maxMonth = 12
-    minDay = 1
-    maxDay = 31
-    minYear = 1970
-    maxYear = curYear
+  else {
+    instructions = "Select a past date to get the historical weather data from that date"
     onDateClick = "javascript:getPastDateData(" + loc + ")"
-    buttonText = "Display Past Weather Data"
+    buttonText = "Retrieve"
   }
 
   var popUpText = [
+    backBttn +
     "<p>" + instructions + "</p>" +
-    "<p>Month: <input id='monthInput' type='number' min='" + minMonth + "' max='" + maxMonth + "' width='2' placeholder='" + curMonth.toString() + "'></p>",
-    "<p>Day: <input id='dayInput' type='number' min='" + minDay + "' max='" + maxDay + "' width='2' placeholder='" + curDay.toString() + "'></p>",
-    "<p>Year: <input id='yearInput' type='number' min='" + minYear + "' max='" + maxYear + "' width='4' placeholder='" + curYear.toString() + "'></p>",
+    "<p>Date: <input type='text' id='datepicker'></p>",
     "<p><button class='button' onclick='" + onDateClick + "'>" + buttonText + "</button></p>",
   ].join("\n")
 
@@ -399,31 +397,72 @@ function enterDate(location, getFuture) {
     .setContent(popUpText)
     .setLatLng(location)
     .openOn(Map)
+
+  $(function() {
+    var curDate = new Date(),
+        tomorrow = new Date(curDate),
+        yesterday = new Date(curDate);
+    tomorrow.setDate(curDate.getDate()+1);
+    yesterday.setDate(curDate.getDate()-1);
+
+    if (getFuture) {
+      datePicker = $('#datepicker').datepicker({
+        changeYear: true,
+        minDate: tomorrow
+      });
+    }
+    else {
+      datePicker = $('#datepicker').datepicker({
+        changeYear: true,
+        minDate: new Date(1931, 0, 1),
+        maxDate: yesterday
+      });
+    }
+
+    var curYear = curDate.getYear() + 1900,
+        curMonth = curDate.getMonth() + 1,
+        curDay = curDate.getDate(),
+        dateString = curMonth + "/" + curDay + "/" + curYear;
+    datePicker.datepicker( "setDate", dateString);
+  });
+}
+
+//------------------------------------------------------------------------------
+// Gets selected date and passes back relevant fields
+function getDatepickerData(location) {
+  var selectedDate = datePicker.datepicker('getDate');
+  var dateInfo = {
+    'year': selectedDate.getYear() + 1900,
+    'month': selectedDate.getMonth() + 1,
+    'day': selectedDate.getDate(),
+    'getDisplayDate': function() {return this.month + "/" + this.day + "/" + this.year;}
+  }
+  return dateInfo;
 }
 
 //------------------------------------------------------------------------------
 // Gets the weather for the input futuredate
 function getFutureDateData(location) {
-  var month = document.getElementById('monthInput').value
-  var day = document.getElementById('dayInput').value
-  var year = document.getElementById('yearInput').value
-  var lat = location.lat
-  var lon = location.lon
-  var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
+
+  var dateInfo = getDatepickerData();
+  destroyDatepicker();
+
+  var lat = location.lat;
+  var lon = location.lon;
 
   L.popup()
-    .setContent("Predicting weather for " + displayDate + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
+    .setContent("Predicting weather for " + dateInfo.getDisplayDate() + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
-  $.ajax("/api/predictConditions/" + lat + "," + lon + "," + month + "," + day, {
+  $.ajax("/api/predictConditions/" + lat + "," + lon + "," + dateInfo.month + "," + dateInfo.day, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotFutureConditions(location, data, status, jqXhr, displayDate)
+      gotFutureConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
     },
     error: function() {
       L.popup()
-        .setContent("Error predicting weather for " + displayDate + ", sorry!")
+        .setContent("Error predicting weather for " + dateInfo.getDisplayDate() + ", sorry!")
         .setLatLng(location)
         .openOn(Map)
     }
@@ -467,26 +506,26 @@ function gotFutureConditions(location, data, status, jqXhr, dateString) {
 //------------------------------------------------------------------------------
 // Gets the weather for the input past date
 function getPastDateData(location) {
-  var month = document.getElementById('monthInput').value
-  var day = document.getElementById('dayInput').value
-  var year = document.getElementById('yearInput').value
-  var lat = location.lat
-  var lon = location.lon
-  var displayDate = month.toString() + "/" + day.toString() + "/" + year.toString()
+
+  var dateInfo = getDatepickerData();
+  destroyDatepicker();
+
+  var lat = location.lat;
+  var lon = location.lon;
 
   L.popup()
-    .setContent("Getting weather data for " + displayDate + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
+    .setContent("Getting weather data for " + dateInfo.getDisplayDate() + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
     .openOn(Map)
 
-  $.ajax("/api/pastConditions/" + lat + "," + lon + "," + month + "," + day + "," + year, {
+  $.ajax("/api/pastConditions/" + lat + "," + lon + "," + dateInfo.month + "," + dateInfo.day + "," + dateInfo.year, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotPastConditions(location, data, status, jqXhr, displayDate)
+      gotPastConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
     },
     error: function() {
       L.popup()
-        .setContent("Error getting weather data for " + displayDate + ", sorry!")
+        .setContent("Error getting weather data for " + dateInfo.getDisplayDate() + ", sorry!")
         .setLatLng(location)
         .openOn(Map)
     }
@@ -560,7 +599,7 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   var iconMarkup = "<i class='wi " + icon + " wi-size-m wi-popup'></i>";
 
   var descriptor = (showPrediction) ? "will be" : "was";
-  var predictionDates = (showPrediction) ? "<p>Based on data from " + startYear.toString() + " to " + endYear.toString() + ", we predict the" : "<p>The";
+  var predictionDates = (showPrediction) ? "<p>Based on weather observations from " + startYear.toString() + " to " + endYear.toString() + ", we predict the" : "<p>The";
   var desc = predictionDates + " weather on " + dateString + " " + descriptor + ":</p>";
 
   var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup
@@ -657,7 +696,7 @@ function showHistory(location, history) {
 
   var table = [
     "<table>",
-      "<tr><td><strong>Year</strong> <td class='td-indent'><strong>Temp</strong> <td class='td-indent'><strong>Conditions</strong>",
+      "<tr><td><strong>Year</strong> <td class='td-history'><strong>Temp</strong> <td class='td-history'><strong>Conditions</strong>",
   ]
 
   history.forEach(function(data){
@@ -665,8 +704,8 @@ function showHistory(location, history) {
     var temp  = getTempString(data[1]);
     var cond  = data[2];
     var entry = "<tr><td class='history-row'>" + year +
-                "<td class='td-indent'>" + temp +
-                "<td class='td-indent'>" + cond;
+                "<td class='td-history'>" + temp +
+                "<td class='td-history'>" + cond;
 
     table.push(entry)
   })

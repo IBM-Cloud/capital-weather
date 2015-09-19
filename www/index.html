@@ -8,12 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>capital weather</title>
 
-    <link rel="icon"       href="icon.png">
+    <link rel="icon"       href="images/icon.png">
     <link rel="stylesheet" href="bower/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower/bootstrap/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="weather-icons/css/weather-icons.css">
     <link rel="stylesheet" href="bower/leaflet/leaflet.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="css/index.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -24,6 +25,7 @@
   </head>
   <body>
     <div id="map"></div>
+    <input type='text' id='datepicker'></p>
 
     <div id="icon-preload" style="font-size: 1px">
     <i class="wi wi-cloudy"></i>
@@ -41,6 +43,7 @@
     </div>
 
     <script src="bower/jquery/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="bower/bootstrap/js/bootstrap.min.js"></script>
     <script src="bower/leaflet/leaflet-src.js"></script>
     <script src="bower/esri-leaflet/esri-leaflet.js"></script>
