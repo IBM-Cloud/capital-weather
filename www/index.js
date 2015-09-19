@@ -13,15 +13,17 @@ var Help
 var geocoder = new google.maps.Geocoder
 var curZoom;
 var datePicker;
+var capitalsLeft;
 
 $(onLoad)
 
 // Get capital cities from locations.js file
 // If running locally, only use 1st 10 cities for debugging
-Locations = getLocations()
+Locations = getLocations();
 if (location.hostname == "localhost") {
-   Locations = Locations.slice(0,10)
+   Locations = Locations.slice(0,10);
 }
+capitalsLeft = Locations.length-1;
 
 //------------------------------------------------------------------------------
 function onLoad() {
@@ -35,11 +37,18 @@ function onLoad() {
     $(".leaflet-control-container")[0].appendChild(forkNode);
   }, 1000);
 
+  // Initialize map in a disabled state
   Map = L.map("map", {
-    doubleClickZoom: false
+    doubleClickZoom: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    touchZoom: false,
+    boxZoom: false,
+    tap: false
   })
+  document.getElementById('map').style.cursor='wait';
 
-  // add markers to all locations
+  // Add markers to all capitals and get current weather conditions
   Locations.forEach(function(location){
     getCurrentConditions(location)
 
@@ -53,7 +62,7 @@ function onLoad() {
     marker.addTo(Map)
   })
 
-  // add layer control
+  // Add layer control
   var ngLayer = L.esri.basemapLayer("NationalGeographic")
   ngLayer.addTo(Map)
 
@@ -106,24 +115,17 @@ function onLoad() {
     // Get the corresponding css class for the current zoom level
     curZoom = getIconZoom(e.target._zoom);
 
-    // Determine the old zoom
-    var icons = document.getElementsByClassName("wi");
-    var oldZoom;
-    if (icons[0].classList.contains("wi-size-xs")) oldZoom = "wi-size-xs";
-    if (icons[0].classList.contains("wi-size-s")) oldZoom = "wi-size-s";
-    if (icons[0].classList.contains("wi-size-m")) oldZoom = "wi-size-m";
-    if (icons[0].classList.contains("wi-size-l")) oldZoom = "wi-size-l";
-    if (icons[0].classList.contains("wi-size-xl")) oldZoom = "wi-size-xl";
-    if (icons[0].classList.contains("wi-size-xxl")) oldZoom = "wi-size-xxl";
-
-    // Resize icons to new zoom level
-    for (var i=0; i < icons.length; i++) {
-      if (!icons[i].classList.contains("wi-popup")) {
-        icons[i].classList.remove(oldZoom);
-        icons[i].classList.add(curZoom);
-      }
-    }
-  })
+    // Adjust size of marker icons based on new zoom level
+    Locations.forEach(function(location){
+      var marker = location.marker;
+      var icon = L.divIcon({
+        html:      "<i class='wi " + marker.iconCode + " " + curZoom.zoomClass + "'></i>",
+        iconSize:  curZoom.zoomSize,
+        className: "location-icon"
+      });
+      marker.setIcon(icon);
+    });
+  });
 
   Map.on("popupclose", function(e) {
     destroyDatepicker();
@@ -309,18 +311,50 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     "<img class='predict_img' alt='Predict weather on a future date' title='Predict weather on a future date' src='images/predict_icon.png' onclick='" + onFutureDateClick + "'></img>"
   ].join("\n")
 
+  var marker = location.marker
+  marker.iconCode = icon;
   var icon = L.divIcon({
-    html:      "<i class='wi " + icon + " " + curZoom + "'></i>",
-    iconSize:  [64,64],
+    html:      "<i class='wi " + icon + " " + curZoom.zoomClass + "'></i>",
+    iconSize:  curZoom.zoomSize,
     className: "location-icon"
   })
+  marker.setIcon(icon)
 
   var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table + buttons
 
-  var marker = location.marker
-  marker.setIcon(icon)
-  marker.bindPopup(popupText)
-  marker.setOpacity(1)
+  // If loading capitals, do not enable popup yet
+  if (capitalsLeft > 0) {
+    $("div[title='" + location.name + "']")[0].style.cursor = 'wait';
+    marker.popupText = popupText;
+  }
+  else {
+    marker.bindPopup(popupText);
+  }
+  marker.setOpacity(1);
+
+  // After the last capital marker is created, enable map again
+  capitalsLeft--;
+  if (capitalsLeft === 0)
+    mapLoaded();
+}
+
+//------------------------------------------------------------------------------
+function mapLoaded() {
+  Map.dragging.enable();
+  Map.touchZoom.enable();
+  Map.scrollWheelZoom.enable();
+  Map.boxZoom.enable();
+  Map.keyboard.enable();
+  if (Map.tap) Map.tap.enable();
+  document.getElementById('map').style.cursor='-webkit-grab';
+
+  // Enable all capital markers
+  Locations.forEach(function(location){
+    location.marker.bindPopup(location.marker.popupText);
+    setTimeout(function(){
+      $("div[title='" + location.name + "']")[0].style.cursor = 'pointer';
+    }, 1000);
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -710,22 +744,40 @@ function showHistory(location, history) {
 //------------------------------------------------------------------------------
 function getIconZoom(zoomLevel) {
   if (zoomLevel < 4) {
-    return "wi-size-xs";
+    return {
+      'zoomClass': "wi-size-xs",
+      'zoomSize': [20,20]
+    };
   }
   else if (zoomLevel === 4) {
-    return "wi-size-s";
+    return {
+      'zoomClass': "wi-size-s",
+      'zoomSize': [32,32]
+    };
   }
   else if (zoomLevel === 5) {
-    return "wi-size-m";
+    return {
+      'zoomClass': "wi-size-m",
+      'zoomSize': [48,48]
+    };
   }
   else if (zoomLevel === 6) {
-    return "wi-size-l";
+    return {
+      'zoomClass': "wi-size-l",
+      'zoomSize': [56,56]
+    };
   }
   else if (zoomLevel === 7) {
-    return "wi-size-xl";
+    return {
+      'zoomClass': "wi-size-xl",
+      'zoomSize': [64,64]
+    };
   }
   else if (zoomLevel > 7) {
-    return "wi-size-xxl";
+    return {
+      'zoomClass': "wi-size-xxl",
+      'zoomSize': [64,64]
+    };
   }
 }
 
