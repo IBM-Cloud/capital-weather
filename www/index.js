@@ -20,14 +20,13 @@ $(onLoad)
 // Get capital cities from locations.js file
 // If running locally, only use 1st 10 cities for debugging
 Locations = getLocations();
-if (location.hostname == "localhost") {
+/*if (location.hostname == "localhost") {
    Locations = Locations.slice(0,10);
-}
+}*/
 capitalsLeft = Locations.length-1;
 
 //------------------------------------------------------------------------------
 function onLoad() {
-  setTimeout(hidePreloadedIcons, 5000)
 
   // Inject 'Fork me on GitHub' banner into map UI
   setTimeout(function(){
@@ -44,23 +43,22 @@ function onLoad() {
     scrollWheelZoom: false,
     touchZoom: false,
     boxZoom: false,
-    tap: false
+    tap: false,
+    zoom: 5
   })
   document.getElementById('map').style.cursor='wait';
+  curZoom = getIconZoom(5);
 
-  // Add markers to all capitals and get current weather conditions
-  Locations.forEach(function(location){
-    getCurrentConditions(location)
+  // Create the help buttons in bottom-left of map
+  Help = L.popup()
+    .setContent(getHelpHTML())
+  createHelpBtn("help", "Help", displayHelp);
 
-    var marker = L.marker(location, {
-      title:   location.name,
-      alt:     location.name,
-      opacity: 1
-    })
+  Key = L.popup()
+    .setContent(getKeyHTML())
+  createHelpBtn("key", "Key", displayKey);
 
-    location.marker = marker
-    marker.addTo(Map)
-  })
+  setTimeout(displayHelp, 1000);
 
   // Add layer control
   var ngLayer = L.esri.basemapLayer("NationalGeographic")
@@ -79,18 +77,30 @@ function onLoad() {
 
   L.control.layers(baseMaps).addTo(Map)
 
-  // Create the help buttons in bottom-left of map
-  Help = L.popup()
-    .setContent(getHelpHTML())
-  createHelpBtn("help", "Help", displayHelp);
+  // Fit map to initial bounds
+  var bounds = [
+    { lat: 44.32, lon:  -69.76 }, // maine
+    { lat: 38.55, lon: -121.46 }, // california
+  ]
+  Map.fitBounds(bounds, {padding:[0,0]})
 
-  Key = L.popup()
-    .setContent(getKeyHTML())
-  createHelpBtn("key", "Key", displayKey);
+  // Add markers to all capitals and get current weather conditions
+  Locations.forEach(function(location){
+    getCurrentConditions(location)
 
-  setTimeout(displayHelp, 1000);
+    var marker = L.marker(location, {
+      title:   location.name,
+      alt:     location.name,
+      opacity: 1
+    })
 
-  // Gets the current weather conditions on the location clicked
+    location.marker = marker
+    marker.addTo(Map)
+  })
+
+//---Map Event Listeners--------------------------------------------------------
+
+  // Mouse Double-click: Gets the current weather conditions on location clicked
   Map.on("dblclick", function(e) {
     var location = {
       lat:  e.latlng.lat,
@@ -111,6 +121,7 @@ function onLoad() {
     getCurrentConditions(location)
   })
 
+  // New Zoom Level: Adjusts marker icon size
   Map.on("zoomend", function(e) {
     // Get the corresponding css class for the current zoom level
     curZoom = getIconZoom(e.target._zoom);
@@ -127,19 +138,14 @@ function onLoad() {
     });
   });
 
+  // Close Popup: Destroy current datepicker instance
   Map.on("popupclose", function(e) {
     destroyDatepicker();
   });
-
-  // fit map to initial bounds
-  var bounds = [
-    { lat: 44.32, lon:  -69.76 }, // maine
-    { lat: 38.55, lon: -121.46 }, // california
-  ]
-  Map.fitBounds(bounds, {padding:[0,0]})
 }
 
 //------------------------------------------------------------------------------
+// Creates a new help button in the lower-left of the map
 function createHelpBtn(bttnId, text, displayFunc) {
   var helpBtn = L.control({position: "bottomleft"})
 
@@ -158,17 +164,13 @@ function createHelpBtn(bttnId, text, displayFunc) {
 }
 
 //------------------------------------------------------------------------------
+// Destroys the currently instantiated datpicker object, if existing
 function destroyDatepicker() {
   if (datePicker) {
     datePicker.datepicker("hide");
     datePicker.datepicker("destroy");
     datePicker = null;
   }
-}
-
-//------------------------------------------------------------------------------
-function hidePreloadedIcons() {
-  $("#icon-preload").hide()
 }
 
 //------------------------------------------------------------------------------
