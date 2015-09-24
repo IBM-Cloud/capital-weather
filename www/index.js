@@ -261,7 +261,7 @@ function getCurrentConditions(location) {
   var lat = location.lat
   var lon = location.lon
 
-  $.ajax("/api/currentConditions/" + lat + "," + lon, {
+  $.ajax("/api/currentConditions?latitude=" + lat + "&longitude=" + lon, {
     dataType: "json",
     success: function(data, status, jqXhr) {
       gotCurrentConditions(location, data, status, jqXhr)
@@ -474,7 +474,7 @@ function getFutureDateData(location) {
     .setLatLng(location)
     .openOn(Map)
 
-  $.ajax("/api/predictConditions/" + lat + "," + lon + "," + dateInfo.month + "," + dateInfo.day, {
+  $.ajax("/api/predictConditions?latitude=" + lat + "&longitude=" + lon + "&month=" + dateInfo.month + "&day=" + dateInfo.day, {
     dataType: "json",
     success: function(data, status, jqXhr) {
       gotFutureConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
@@ -537,7 +537,7 @@ function getPastDateData(location) {
     .setLatLng(location)
     .openOn(Map)
 
-  $.ajax("/api/pastConditions/" + lat + "," + lon + "," + dateInfo.month + "," + dateInfo.day + "," + dateInfo.year, {
+  $.ajax("/api/pastConditions?latitude=" + lat + "&longitude=" + lon + "&month=" + dateInfo.month + "&day=" + dateInfo.day + "&year=" + dateInfo.year, {
     dataType: "json",
     success: function(data, status, jqXhr) {
       gotPastConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
@@ -639,7 +639,7 @@ function getHistoricConditions(location) {
     .setLatLng(location)
     .openOn(Map)
 
-  $.ajax("/api/historicConditions/" + lat + "," + lon, {
+  $.ajax("/api/historicConditions?latitude=" + lat + "&longitude=" + lon, {
     dataType: "json",
     success: function(data, status, jqXhr) {
       gotHistoricConditions(location, data, status, jqXhr)
