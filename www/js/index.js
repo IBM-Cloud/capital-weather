@@ -8,12 +8,12 @@
 //   http://esri.github.io/esri-leaflet/api-reference/
 //------------------------------------------------------------------------------
 
-var Map
-var Help
-var geocoder = new google.maps.Geocoder
-var curZoom;
-var datePicker;
-var capitalsLeft;
+var Map,
+    Help,
+    geocoder = new google.maps.Geocoder,
+    curZoom,
+    datePicker,
+    capitalsLeft;
 
 $(onLoad)
 
@@ -38,15 +38,8 @@ function onLoad() {
 
   // Initialize map in a disabled state
   Map = L.map("map", {
-    doubleClickZoom: false,
-    dragging: false,
-    scrollWheelZoom: false,
-    touchZoom: false,
-    boxZoom: false,
-    tap: false,
     zoom: 5
-  })
-  document.getElementById('map').style.cursor='wait';
+  });
   curZoom = getIconZoom(5);
 
   // Create the help buttons in bottom-left of map
@@ -61,8 +54,8 @@ function onLoad() {
   setTimeout(displayHelp, 1000);
 
   // Add layer control
-  var ngLayer = L.esri.basemapLayer("NationalGeographic")
-  ngLayer.addTo(Map)
+  var ngLayer = L.esri.basemapLayer("NationalGeographic");
+  ngLayer.addTo(Map);
 
   var baseMaps = {
     Streets:            L.esri.basemapLayer("Streets"),
@@ -73,20 +66,20 @@ function onLoad() {
     DarkGray:           L.esri.basemapLayer("DarkGray"),
     Imagery:            L.esri.basemapLayer("Imagery"),
     ShadedRelief:       L.esri.basemapLayer("ShadedRelief"),
-  }
+  };
 
-  L.control.layers(baseMaps).addTo(Map)
+  L.control.layers(baseMaps).addTo(Map);
 
   // Fit map to initial bounds
   var bounds = [
     { lat: 44.32, lon:  -69.76 }, // maine
     { lat: 38.55, lon: -121.46 }, // california
-  ]
-  Map.fitBounds(bounds, {padding:[0,0]})
+  ];
+  Map.fitBounds(bounds, {padding:[0,0]});
 
   // Add markers to all capitals and get current weather conditions
   Locations.forEach(function(location){
-    getCurrentConditions(location)
+    getCurrentConditions(location);
 
     var marker = L.marker(location, {
       title:   location.name,
@@ -94,8 +87,8 @@ function onLoad() {
       opacity: 1
     })
 
-    location.marker = marker
-    marker.addTo(Map)
+    location.marker = marker;
+    marker.addTo(Map);
   })
 
 //---Map Event Listeners--------------------------------------------------------
@@ -106,19 +99,19 @@ function onLoad() {
       lat:  e.latlng.lat,
       lon:  e.latlng.lng,
       name: e.latlng.lat.toFixed(4) + ", " + e.latlng.lng.toFixed(4)
-    }
+    };
 
     var marker = L.marker(location, {
       title:   location.name,
       alt:     location.name,
       opacity: 0
-    })
+    });
 
-    location.marker = marker
-    marker.addTo(Map)
+    location.marker = marker;
+    marker.addTo(Map);
 
-    getLocationName(e.latlng.lat, e.latlng.lng, location)
-    getCurrentConditions(location)
+    getLocationName(e.latlng.lat, e.latlng.lng, location);
+    getCurrentConditions(location);
   })
 
   // New Zoom Level: Adjusts marker icon size
@@ -147,20 +140,20 @@ function onLoad() {
 //------------------------------------------------------------------------------
 // Creates a new help button in the lower-left of the map
 function createHelpBtn(bttnId, text, displayFunc) {
-  var helpBtn = L.control({position: "bottomleft"})
+  var helpBtn = L.control({position: "bottomleft"});
 
   helpBtn.onAdd = function (map) {
-    var div = L.DomUtil.create("div")
+    var div = L.DomUtil.create("div");
 
-    div.innerHTML = "<button id='" + bttnId + "-button' type='button' class='btn btn-default'>" + text + "</button>"
+    div.innerHTML = "<button id='" + bttnId + "-button' type='button' class='btn btn-default'>" + text + "</button>";
 
     $(document).on( "click", "#" + bttnId + "-button", function() {
-      displayFunc()
-    })
+      displayFunc();
+    });
 
-    return div
+    return div;
   }
-  helpBtn.addTo(Map)
+  helpBtn.addTo(Map);
 }
 
 //------------------------------------------------------------------------------
@@ -258,13 +251,14 @@ function getLocationName(lat, lon, loc) {
 //------------------------------------------------------------------------------
 // Retrieves the current weather conditions from Jetstream
 function getCurrentConditions(location) {
-  var lat = location.lat
-  var lon = location.lon
+  var lat = location.lat;
+  var lon = location.lon;
 
   $.ajax("/api/currentConditions?latitude=" + lat + "&longitude=" + lon, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotCurrentConditions(location, data, status, jqXhr)
+      if (!data.error)
+        gotCurrentConditions(location, data, status, jqXhr);
     }
   })
 }
@@ -272,137 +266,105 @@ function getCurrentConditions(location) {
 //------------------------------------------------------------------------------
 // Called after successfully retrieving the current weather conditions
 function gotCurrentConditions(location, data, status, jqXhr) {
-  var observation = data.observation
-  if (null == observation) return
-  var icon_code = observation.icon_code
-  var icon = code2icon(icon_code)
 
-  var desc = observation.phrase_32char
-  var temp = "???"
-  var wspd = "???"
+  // Extract the info from the returned data
+  if (null == data) return;
 
-  if (observation.imperial) {
-    temp = getTempString(observation.imperial.temp)
-    wspd = getSpeedString(observation.imperial.wspd)
-  }
+  var icon = code2icon(data.iconCode);
+  var desc = data.conditionPhrase;
+  var uvPhrase = code2uv(data.uvIndex);
 
-  var uv_index  = observation.uv_index
-  var uv_phrase = UV_desc[uv_index] || "???"
+  var temp = windSpeed = "???";
+  if (data.temp !== null) temp = getTempString(data.temp);
+  if (data.windSpeed !== null) windSpeed = getSpeedString(data.windSpeed);
 
   var loc = JSON.stringify({
     lat:  location.lat,
     lon:  location.lon,
     name: location.name
-  })
+  });
 
-  var onHistoryClick = "javascript:getHistoricConditions(" + loc + ")"
-  var onPastDateClick = "javascript:enterDate(" + loc + ", false)"
-  var onFutureDateClick = "javascript:enterDate(" + loc + ", true)"
   var table = [
     "<table>",
       "<tr><td class='weather-data-row'><strong>Conditions: </strong><td class='td-indent'>" + desc,
       "<tr><td class='weather-data-row'><strong>Temperature: </strong><td class='td-indent'>" + temp,
-      "<tr><td class='weather-data-row'><strong>Wind Speed: </strong><td class='td-indent'>" + wspd,
-      "<tr><td class='weather-data-row'><strong>UV Index: </strong><td class='td-indent'>" + uv_phrase,
+      "<tr><td class='weather-data-row'><strong>Wind Speed: </strong><td class='td-indent'>" + windSpeed,
+      "<tr><td class='weather-data-row'><strong>UV Index: </strong><td class='td-indent'>" + uvPhrase,
     "</table>"
-  ].join("\n")
+  ].join("\n");
 
+  // Set the HTML for the current condition popup
+  var onHistoryClick = "javascript:getHistoricConditions(" + loc + ")";
+  var onPastDateClick = "javascript:enterDate(" + loc + ", false)";
+  var onFutureDateClick = "javascript:enterDate(" + loc + ", true)";
   var buttons = [
     "<img class='date_img' alt='Weather on a past date' title='Weather on a past date' src='images/date_icon.png' onclick='" + onPastDateClick + "'></img>",
     "<img class='history_img' alt='Weather on this date in history' title='Weather on this date in history' src='images/history_icon.png' onclick='" + onHistoryClick + "'></img>",
     "<img class='predict_img' alt='Predict weather on a future date' title='Predict weather on a future date' src='images/predict_icon.png' onclick='" + onFutureDateClick + "'></img>"
-  ].join("\n")
+  ].join("\n");
 
-  var marker = location.marker
+  var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table + buttons;
+
+  // Replace default marker with weather icon
+  var marker = location.marker;
   marker.iconCode = icon;
   var icon = L.divIcon({
     html:      "<i class='wi " + icon + " " + curZoom.zoomClass + "'></i>",
     iconSize:  curZoom.zoomSize,
     className: "location-icon"
-  })
-  marker.setIcon(icon)
-
-  var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table + buttons
-
-  // If loading capitals, do not enable popup yet
-  if (capitalsLeft > 0) {
-    $("div[title='" + location.name + "']")[0].style.cursor = 'wait';
-    marker.popupText = popupText;
-  }
-  else {
-    marker.bindPopup(popupText);
-  }
-  marker.setOpacity(1);
-
-  // After the last capital marker is created, enable map again
-  capitalsLeft--;
-  if (capitalsLeft === 0)
-    mapLoaded();
-}
-
-//------------------------------------------------------------------------------
-function mapLoaded() {
-  Map.dragging.enable();
-  Map.touchZoom.enable();
-  Map.scrollWheelZoom.enable();
-  Map.boxZoom.enable();
-  Map.keyboard.enable();
-  if (Map.tap) Map.tap.enable();
-  document.getElementById('map').style.cursor='-webkit-grab';
-
-  // Enable all capital markers
-  Locations.forEach(function(location){
-    location.marker.bindPopup(location.marker.popupText);
-    setTimeout(function(){
-      $("div[title='" + location.name + "']")[0].style.cursor = 'pointer';
-    }, 1000);
   });
+  marker.setIcon(icon);
+
+  marker.bindPopup(popupText);
+  marker.setOpacity(1);
 }
 
 //------------------------------------------------------------------------------
+// Returns formatted display C/F temperature when given F
 function getTempString(tempF) {
-  tempF = parseInt(tempF, 10)
-  if (isNaN(tempF)) return "???"
+  tempF = parseInt(tempF, 10);
+  if (isNaN(tempF)) return "???";
 
-  var tempC = Math.round((tempF - 32) * 5 / 9)
+  var tempC = Math.round((tempF - 32) * 5 / 9);
 
-  return "" + tempC + "&deg; C / " + tempF + "&deg; F"
+  return "" + tempC + "&deg; C / " + tempF + "&deg; F";
 }
 
 //------------------------------------------------------------------------------
+// Returns formatted display kph/mph temperature when given mph
 function getSpeedString(mph) {
-  mph = parseInt(mph, 10)
-  if (isNaN(mph)) return "???"
+  mph = parseInt(mph, 10);
+  if (isNaN(mph)) return "???";
 
-  var kph = Math.round(mph * 1.6)
+  var kph = Math.round(mph * 1.6);
 
-  return "" + kph + " kph / " + mph + " mph"
+  return "" + kph + " kph / " + mph + " mph";
 }
 
 //------------------------------------------------------------------------------
 // Instructs the user to enter a date so they can get past/future weather data
 function enterDate(location, getFuture) {
 
-  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
-  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")";
+  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>";
 
   var loc = JSON.stringify({
     lat:  location.lat,
     lon:  location.lon,
     name: location.name
-  })
+  });
 
   // Sets the pop up text based on if getting past or future date
   var instructions, minMonth, maxMonth, minDay, maxDay, minYear, maxYear, onDateClick, buttonText;
   if (getFuture) {
-    instructions = "Select a future date to predict the weather on that day"
-    onDateClick = "javascript:getFutureDateData(" + loc + ")"
-    buttonText = "Predict"
+    instructions = "Select a future date to predict the weather on that day";
+    onDateClick = "javascript:getFutureDateData(" + loc + ")";
+    buttonText = "Predict";
   }
   else {
-    instructions = "Select a past date to get the historical weather data from that date"
-    onDateClick = "javascript:getPastDateData(" + loc + ")"
-    buttonText = "Retrieve"
+    instructions = "Select a past date to get the historical weather data from that date";
+    onDateClick = "javascript:getPastDateData(" + loc + ")";
+    buttonText = "Retrieve";
   }
 
   var popUpText = [
@@ -410,7 +372,7 @@ function enterDate(location, getFuture) {
     "<p>" + instructions + "</p>" +
     "<p>Date: <input type='text' id='datepicker'></p>",
     "<p><button class='button' onclick='" + onDateClick + "'>" + buttonText + "</button></p>",
-  ].join("\n")
+  ].join("\n");
 
   L.popup()
     .setContent(popUpText)
@@ -455,7 +417,7 @@ function getDatepickerData(location) {
     'month': selectedDate.getMonth() + 1,
     'day': selectedDate.getDate(),
     'getDisplayDate': function() {return this.month + "/" + this.day + "/" + this.year;}
-  }
+  };
   return dateInfo;
 }
 
@@ -492,19 +454,16 @@ function getFutureDateData(location) {
 // Take returned weather prediction and parse it for display
 function gotFutureConditions(location, data, status, jqXhr, dateString) {
   try {
-    var noDataAvailable = false;
-    if (data.status === "failure") noDataAvailable = true
-
-    var condition = [data.avgTemp, data.frequentCondition, data.iconCode]
-
-    // If no historical data was available, throw error
-    // Otherwise, configure the pop-up window to display the data
-    if (noDataAvailable)
-    {
-      throw "No historical data available for " + dateString + ", sorry!"
+    // If no data was found, throw an error based on the context
+    if (!data.success) {
+      if (data.noData)
+        throw "No historical data available for " + dateString + " so we are unable to predict the weather. Sorry!";
+      else
+        throw null;
     }
-    else
-      showWeatherForDate(true, location, condition, dateString, data.startYear, data.endYear)
+
+    var condition = [data.avgTemp, data.frequentCondition, data.iconCode];
+    showWeatherForDate(true, location, condition, dateString, data.startYear, data.endYear);
   }
   // If no past results were available or error parsing, print message on pop-up
   catch(e) {
@@ -512,9 +471,7 @@ function gotFutureConditions(location, data, status, jqXhr, dateString) {
     if (typeof e === 'string')
       errMsg = e;
     else
-    {
-      errMsg = "Error predicting weather for " + dateString + ", sorry!"
-    }
+      errMsg = "Error predicting weather for " + dateString + ", sorry!";
     L.popup()
       .setContent(errMsg)
       .setLatLng(location)
@@ -555,7 +512,15 @@ function getPastDateData(location) {
 // Take returned past conditions and parse them for display
 function gotPastConditions(location, data, status, jqXhr, dateString) {
   try {
-    gotPastConditions_(location, data, status, jqXhr, dateString)
+    if (data) {
+      if (data.error)
+        throw null;
+      var condition = [data.temp, data.conditionPhase, data.iconCode];
+      showWeatherForDate(false, location, condition, dateString);
+    }
+    else
+      throw "No weather data available for " + dateString + ", sorry!";
+    //gotPastConditions_(location, data, status, jqXhr, dateString)
   }
   // If no past results were available or error parsing, print message on pop-up
   catch(e) {
@@ -563,9 +528,7 @@ function gotPastConditions(location, data, status, jqXhr, dateString) {
     if (typeof e === 'string')
       errMsg = e;
     else
-    {
       errMsg = "Error getting weather data for " + dateString + ", sorry!"
-    }
     L.popup()
       .setContent(errMsg)
       .setLatLng(location)
@@ -574,46 +537,22 @@ function gotPastConditions(location, data, status, jqXhr, dateString) {
 }
 
 //------------------------------------------------------------------------------
-function gotPastConditions_(location, data, status, jqXhr, dateString) {
-  // If there was no data available for this date, show error
-  var noDataAvailable = false;
-  if (data.errors) noDataAvailable = true
-
-  // If the observation doesn't have the necessary attributes, show error
-  var obs = data.observations[0]
-  if (null == obs) noDataAvailable = true
-  if (null == obs.temp) noDataAvailable = true
-  if (null == obs.wx_phrase) obs.wx_phrase = "Unknown"
-
-  var condition = [obs.temp, obs.wx_phrase, obs.wx_icon]
-
-  // If no historical data was available, throw error
-  // Otherwise, configure the pop-up window to display the data
-  if (noDataAvailable)
-  {
-    throw "No historical data available for " + dateString + ", sorry!"
-  }
-  else
-    showWeatherForDate(false, location, condition, dateString)
-}
-
-//------------------------------------------------------------------------------
 // Shows the weather for a particular input date
 function showWeatherForDate(showPrediction, location, condition, dateString, startYear, endYear) {
-  Map.closePopup()
+  Map.closePopup();
 
-  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
-  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")";
+  var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>";
 
-  var temp = getTempString(condition[0]);
+  var temp = getTempString(condition[0]);;
   var icon = code2icon(condition[2]);
   var weather = [
     "<table>",
       "<tr><td class='weather-data-row'><strong>Conditions: </strong><td class='td-indent'>" + condition[1],
       "<tr><td class='weather-data-row'><strong>Temperature: </strong><td class='td-indent'>" + temp,
     "</table>"
-  ]
-  weather = weather.join("\n")
+  ];
+  weather = weather.join("\n");
 
   var iconMarkup = "<i class='wi " + icon + " wi-size-m wi-popup'></i>";
 
@@ -621,7 +560,7 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   var predictionDates = (showPrediction) ? "<p>Based on weather observations from " + startYear.toString() + " to " + endYear.toString() + ", we predict the" : "<p>The";
   var desc = predictionDates + " weather on " + dateString + " " + descriptor + ":</p>";
 
-  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup
+  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + weather + iconMarkup;
 
   L.popup()
     .setContent(popupHTML)
@@ -630,6 +569,7 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
 }
 
 //------------------------------------------------------------------------------
+// Make call to weather API to get past weather conditions
 function getHistoricConditions(location) {
   var lat = location.lat
   var lon = location.lon
@@ -654,10 +594,13 @@ function getHistoricConditions(location) {
 }
 
 //------------------------------------------------------------------------------
-// Take returned historic conditions and parse them for display
+// Take returned historic conditions and check them to ensure results are there
 function gotHistoricConditions(location, data, status, jqXhr) {
   try {
-    gotHistoricConditions_(location, data, status, jqXhr)
+    if (data && data.length > 0)
+      showHistory(location, data);
+    else
+      throw "No historical data available, sorry!";
   }
   // If no historical results were available or error parsing, print message on pop-up
   catch(e) {
@@ -674,39 +617,7 @@ function gotHistoricConditions(location, data, status, jqXhr) {
 }
 
 //------------------------------------------------------------------------------
-function gotHistoricConditions_(location, data, status, jqXhr) {
-  var history = []
-  var noDataAvailable = 0;
-
-  // Loop through the returned historical data sets for each year
-  for (var i=0; i<data.length; i++) {
-    // If there was no data available for this date, add to count
-    if (data[i].errors)
-    {
-      noDataAvailable++;
-      continue;
-    }
-    var obs = data[i].observations[0]
-    if (null == obs) continue
-    if (null == obs.valid_time_gmt) continue
-    if (null == obs.temp) continue
-    if (null == obs.wx_phrase) obs.wx_phrase = "Unknown"
-
-    var date = new Date(obs.valid_time_gmt * 1000)
-    var year = date.getYear() + 1900
-
-    history.push([year, obs.temp, obs.wx_phrase])
-  }
-
-  // If no historical data was available, throw error
-  // Otherwise, configure the pop-up window to display the data
-  if (noDataAvailable === data.length)
-    throw "No historical data available, sorry!"
-  else
-    showHistory(location, history)
-}
-
-//------------------------------------------------------------------------------
+// Display historical weather results
 function showHistory(location, history) {
   Map.closePopup()
 
@@ -719,18 +630,17 @@ function showHistory(location, history) {
   ]
 
   history.forEach(function(data){
-    var year  = data[0];
-    var temp  = getTempString(data[1]);
-    var cond  = data[2];
+    var historyYear = JSON.parse(data);
+    var year  = historyYear[0];
+    var temp  = getTempString(historyYear[1]);
+    var cond  = historyYear[2];
     var entry = "<tr><td class='history-row'>" + year +
                 "<td class='td-history'>" + temp +
                 "<td class='td-history'>" + cond;
 
     table.push(entry)
   })
-
   table.push("</table>")
-
   table = table.join("\n")
 
   var desc = "<p>Conditions on this day in previous years:"
@@ -744,6 +654,7 @@ function showHistory(location, history) {
 }
 
 //------------------------------------------------------------------------------
+//
 function getIconZoom(zoomLevel) {
   if (zoomLevel < 4) {
     return {
@@ -784,26 +695,9 @@ function getIconZoom(zoomLevel) {
 }
 
 //------------------------------------------------------------------------------
+// Sets back button on popups
 function goBack(locationName) {
   $("div[title='" + locationName + "']").click();
-}
-
-//------------------------------------------------------------------------------
-var UV_desc = {
-  0:  "Low",
-  1:  "Low",
-  2:  "Low",
-  3:  "Moderate",
-  4:  "Moderate",
-  5:  "Moderate",
-  6:  "High",
-  7:  "High",
-  8:  "Very High",
-  9:  "Very High",
-  10: "Very High",
-  11: "Extreme",
-  12: "Extreme",
-  13: "Extreme",
 }
 
 //------------------------------------------------------------------------------

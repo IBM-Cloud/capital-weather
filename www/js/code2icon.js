@@ -1,7 +1,7 @@
 // Licensed under the Apache License. See footer for details.
 
 function code2icon(code) {
-  return Code2Icon[code] || "wi-alien"
+  return Code2Icon[code] || "wi-alien";
 }
 
 var Code2Icon = {
@@ -39,7 +39,7 @@ var Code2Icon = {
   40: "wi-rain",
   42: "wi-snow",
   47: "wi-lightning",
-}
+};
 //------------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
