@@ -101,6 +101,9 @@ A callback function for getting the weather conditions on a prior date for the i
 
 A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This function makes several calls to the `getOneHC` helper method. Utilizes the `current` method of the Weather Channel API.
 
+## API documentation
+This sample application was built with developer reusability in mind. For ease of use, I have created [Swagger UI API documentation][swagger_api_url] for the algorithms built into this sample app. The API is currently rate limited, so please use it sparingly.
+
 ## Troubleshooting
 
 The primary source of debugging information for your Bluemix app is the logs. To see them, run the following command using the Cloud Foundry CLI:
@@ -142,6 +145,7 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [gist_url]: https://gist.github.com/JakePeyser/5c50c5d06106d54eb058
 [issues_url]: https://github.com/IBM-Bluemix/capital-weather/issues
 [geocoding_api_url]: https://developers.google.com/maps/documentation/geocoding/intro
+[swagger_api_url]: https://capital-weather.mybluemix.net/api-docs/
 [3rdculturekid_url]: http://thethirdculturekid.com/
 [weather_loading_gif_url]:https://dribbble.com/shots/1099769-Google-Weather-GIF
 [design_modo_url]: http://designmodo.com/

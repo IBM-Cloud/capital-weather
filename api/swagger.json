@@ -1,0 +1,170 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Weather History API",
+        "description": "Get detailed weather data for the past, present, and future for a specific lat/lon",
+        "version": "1.0.0",
+        "contact": {
+            "email": "jepeyser@us.ibm.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "host": "capital-weather.mybluemix.net",
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "basePath": "/api",
+    "consumes": [
+        "text/html"
+    ],
+    "produces": [
+        "text/json"
+    ],
+    "tags": [
+        {
+            "name": "condition",
+            "description": "Weather info for a particular day"
+        }
+    ],
+    "paths": {
+        "/currentConditions": {
+            "get": {
+                "summary": "Get current weather conditions for a lat/lon",
+                "description": "The CurrentConditions endpoint returns information about the weather at the input coordinates.\n",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "description": "Latitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "description": "Longitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    }
+                ],
+                "tags": [
+                    "condition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Condition"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid lat/lon specification",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Condition": {
+            "type": "object",
+            "required": [
+                "temp",
+                "error"
+            ],
+            "properties": {
+                "iconCode": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "conditionPhrase": {
+                    "type": "string"
+                },
+                "temp": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "windSpeed": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "uvIndex": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "error": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Errors": {
+            "type": "object",
+            "required": [
+                "metadata",
+                "success",
+                "errors"
+            ],
+            "properties": {
+                "metadata": {
+                    "$ref": "#/definitions/Metadata"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Error"
+                    }
+                }
+            }
+        },
+        "Metadata": {
+            "type": "object",
+            "required": [
+                "version",
+                "transaction_id",
+                "status_code"
+            ],
+            "properties": {
+                "version": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "required": [
+                "code",
+                "message"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Capital Weather",
+        "url": "https://github.com/IBM-Bluemix/capital-weather"
+    }
+}
