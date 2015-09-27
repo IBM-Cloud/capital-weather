@@ -27,14 +27,18 @@
     "tags": [
         {
             "name": "condition",
-            "description": "Weather info for a particular day"
+            "description": "Weather info for a particular date"
+        },
+        {
+            "name": "prediction",
+            "description": "Projected weather info for a specific month and and day"
         }
     ],
     "paths": {
         "/currentConditions": {
             "get": {
                 "summary": "Get current weather conditions for a lat/lon",
-                "description": "The CurrentConditions endpoint returns information about the weather at the input coordinates.\n",
+                "description": "The CurrentConditions endpoint returns information about the current weather at the input coordinates.\n",
                 "parameters": [
                     {
                         "name": "latitude",
@@ -71,6 +75,157 @@
                     }
                 }
             }
+        },
+        "/historicConditions": {
+            "get": {
+                "summary": "Get weather conditions from the last ten years for the current date for a lat/lon",
+                "description": "The HistoricConditions endpoint returns information about the weather at the input coordinates on the current date for the previous ten years.\n",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "description": "Latitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "description": "Longitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    }
+                ],
+                "tags": [
+                    "condition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success or No results",
+                        "schema": {
+                            "$ref": "#/definitions/Condition"
+                        }
+                    }
+                }
+            }
+        },
+        "/pastConditions": {
+            "get": {
+                "summary": "Get weather conditions for a lat/lon on a specific date in the past.",
+                "description": "The PastConditions endpoint returns information about the weather at the input coordinates for a given past date.\n",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "description": "Latitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "description": "Longitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Month of the past date",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "day",
+                        "in": "query",
+                        "description": "Day of the past date",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Year of the past date",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "tags": [
+                    "condition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Condition"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid lat/lon specification or invalid date fields",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/predictConditions": {
+            "get": {
+                "summary": "Get weather predictions for a lat/lon on a specific month and day.",
+                "description": "The PredictConditions endpoint returns predicted information about the weather at the input coordinates for a given month and day, based on the known historical weather conditions at that lat/lon.\n",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "description": "Latitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "description": "Longitude component of location.",
+                        "required": true,
+                        "type": "number",
+                        "format": "double"
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Month of the past date",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "day",
+                        "in": "query",
+                        "description": "Day of the past date",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "tags": [
+                    "prediction"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success, No Results, or Invalid lat/lon specification or invalid date fields,",
+                        "schema": {
+                            "$ref": "#/definitions/Prediction"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -100,7 +255,45 @@
                     "type": "integer",
                     "format": "int32"
                 },
+                "year": {
+                    "type": "integer",
+                    "format": "int32"
+                },
                 "error": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Prediction": {
+            "type": "object",
+            "required": [
+                "success",
+                "noData"
+            ],
+            "properties": {
+                "avgTemp": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "startYear": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "endYear": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "frequentCondition": {
+                    "type": "string"
+                },
+                "iconCode": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "noData": {
                     "type": "boolean"
                 }
             }
