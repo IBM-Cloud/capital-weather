@@ -38,6 +38,7 @@ function onLoad() {
 
   // Initialize map in a disabled state
   Map = L.map("map", {
+    doubleClickZoom: false,
     zoom: 5
   });
   curZoom = getIconZoom(5);
