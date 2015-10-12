@@ -516,7 +516,7 @@ function gotPastConditions(location, data, status, jqXhr, dateString) {
     if (data) {
       if (data.error)
         throw null;
-      var condition = [data.temp, data.conditionPhase, data.iconCode];
+      var condition = [data.temp, data.conditionPhrase, data.iconCode];
       showWeatherForDate(false, location, condition, dateString);
     }
     else

@@ -86,7 +86,7 @@ This command will trigger [`cake`][cake_url] to build and start your application
 Since we are using `cake`, the app is rebuilt continuously as changes are made to the local file system. Therefore, you do not have to constantly stop and restart your app as you develop locally. Run `npm run cake` to see the other commands available in the `Cakefile`.
 
 ## Decomposition Instructions
-The primary purpose of this demo is to provide a sample implementation of the Weather Channel API. The relevant code for this integration is located within the `lib/weatherService.js` file and has been extracted into several [source gists][gist_url]. This section details the callback functions created to call this API.
+The primary purpose of this demo is to provide a sample implementation of the Weather Channel API. The relevant code for this integration is located within the `lib/weatherService.js` file and has been extracted into several [source gists][gist_url]. All helper functions are also included in the gists for reference. This section details the callback functions created to call this API.
 
 ### Current Conditions
 
@@ -98,7 +98,7 @@ A callback function for getting the weather conditions on a prior date for the i
 
 ### Historical Conditions
 
-A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This function makes several calls to the `getOneHC` helper method. Utilizes the `current` method of the Weather Channel API.
+A callback function for getting weather conditions for the past ten years on the current date for the input latitude/longitude value. This function makes several calls to the `getOneHC` helper method. Utilizes the `historical` method of the Weather Channel API.
 
 ## API documentation
 This sample application was built with developer reusability in mind. For ease of use, I have created [Swagger UI API documentation][swagger_api_url] for the algorithms built into this sample app. The API is currently rate limited, so please use it sparingly.
