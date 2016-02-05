@@ -18,9 +18,9 @@ function getHelpHTML() {
 
   html.push("<p>This application uses the")
   html.push("<a href='https://ibm.biz/capital-weather-demo-bluemix' target='_blank'>Bluemix</a>")
-  html.push("Weather Channel service to obtain weather information.")
+  html.push("<a href='https://console.ng.bluemix.net/catalog/services/insights-for-weather/' target='_blank'>Insights for Weather service</a> to obtain weather information.")
   html.push("See the")
-  html.push("<a href='https://www.ng.bluemix.net/docs/#services/Cloudant/index.html#Cloudant' target='_blank'>documentation</a>")
+  html.push("<a href='https://www.ng.bluemix.net/docs/services/Weather/index.html' target='_blank'> service documentation</a>")
   html.push("for more information about using this service in your Bluemix application.")
 
   return html.join("\n")

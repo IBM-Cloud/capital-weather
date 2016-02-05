@@ -1,4 +1,7 @@
-bower_components
+/www/bower
 node_modules
-tmp
 vcap-local.json
+.gitignore
+.git
+README.md
+*.log
