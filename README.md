@@ -1,19 +1,16 @@
 # Capital Weather Overview
 
-Capital Weather is a sample Bluemix application which utilizes the [Weather Channel][weather_api_url] service, two mapping APIs, [Leaflet][leaflet_url] and [Esri Leaflet][esri_leaflet_url], and the [Google Maps Geocoding API][geocoding_api_url]. It allows users to visualize the current weather in all the world capitals, as well as obtain historical weather data and future weather projections. The app provides a real world use case of the Weather Channel API and implements several of the methods exposed by that interface.
+Capital Weather is a sample Bluemix application which utilizes the [Weather Channel service][weather_insights_url], two mapping APIs, [Leaflet][leaflet_url] and [Esri Leaflet][esri_leaflet_url], and the [Google Maps Geocoding API][geocoding_api_url]. It allows users to visualize the current weather in all the world capitals, as well as obtain historical weather data and future weather projections. The app provides a real world use case of the Weather Channel API and implements several of the methods exposed by that interface.
+
+The application is built to interface with the Insights for Weather service on Bluemix or the full TWC API. It will dynamically adjust the capabilities available in the UI based on which service is being used.
+
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
 
 ![Bluemix Deployments](https://deployment-tracker.mybluemix.net/stats/eff78d4dfb884b87f7ff7aae5fe0f45d/badge.svg)
 
 ## Running the app on Bluemix
 
-You can deploy your own instance of Capital Weather to Bluemix. To do this, you can either use the _Deploy to Bluemix_ button for an automated deployment or follow the step below to create and deploy your app manually.
-  
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)  
-**Note**: If deploying by this method, the app will fail on first deploy. After this initial failure, you must complete steps 7-8 below in order to successfully start your app.
-
-1. Create a Bluemix Account
-
-    [Sign up for Bluemix][bluemix_signup_url] or use an existing account.
+1. If you do not already have a Bluemix account, [sign up here][bluemix_signup_url]
 
 2. Download and install the [Cloud Foundry CLI][cloud_foundry_url] tool
 
@@ -36,15 +33,13 @@ You can deploy your own instance of Capital Weather to Bluemix. To do this, you 
   $ cf login
   ```
 
-**The following steps need to be updated once service is made public!!!**
-
 7. Create the Weather Channel service in Bluemix.
 
   ```
   $ cf create-service weather_channel standard capital-weather-service
   ```
 
-8. Push it to Bluemix.
+8. Push the app to Bluemix.
 
   ```
   $ cf push
@@ -53,9 +48,7 @@ You can deploy your own instance of Capital Weather to Bluemix. To do this, you 
 And voila! You now have your very own instance of Capital Weather running on Bluemix.
 
 ## Run the app locally
-1. Create a Bluemix Account. You will need this to create a Weather Channel service and grab the credentials later on.
-
-    [Sign up][bluemix_signup_url] in Bluemix, or use an existing account.
+1. If you do not already have a Bluemix account, [sign up here][bluemix_signup_url]
 
 2. If you have not already, [download node.js][download_node_url] and install it on your local machine.
 
@@ -73,9 +66,9 @@ And voila! You now have your very own instance of Capital Weather running on Blu
   npm install
   ```
 
-6. Create a Weather Channel service using your Bluemix account and replace the corresponding credentials in your `vcap-local.json` file.
+6. Create a Weather Channel service using your Bluemix account and replace the corresponding credentials in your `vcap-local.json` file. You must then delete the `user-provided` service object.
 
-7. Start your app locally with the following command.
+7. Start your app locally with the following command
 
   ```
   npm run watch
@@ -83,7 +76,48 @@ And voila! You now have your very own instance of Capital Weather running on Blu
 
 This command will trigger [`cake`][cake_url] to build and start your application. When your app has started, your console will print that your `server started on: http://localhost:6003`.
 
-Since we are using `cake`, the app is rebuilt continuously as changes are made to the local file system. Therefore, you do not have to constantly stop and restart your app as you develop locally. Run `npm run cake` to see the other commands available in the `Cakefile`.
+Since we are using `cake`, the app is rebuilt continuously as changes are made to the local file system. Therefore, you do not have to constantly stop and restart your app as you develop locally. Execute `npm run cake` to see the other commands available in the `Cakefile`.
+
+## Using the Full TWC API
+Bluemix provides access to the Insights for Weather service, an API exposing a several core Weather Co capabilities. As can be seen in [this repo's live demo][live_demo_url], additional historical data is available using the full TWC API. If you have API credentials for this API, complete the above steps and then follow the steps below to implement ths functionality.
+
+### On Bluemix
+1. Create a user-provided service to represent the full TWC API
+
+	```
+	$ cf cups weather-service -p '{"url":"http://	api.weather.com","apiKey":"API_KEY"}'
+	```
+2. Restage your app so that this new service supercedes the existing Insights for Weather service
+
+	```
+	$ cf restage capital-weather
+	```
+	
+### Locally
+1. Replace the contents of your `vcap-local.json` file with the following:
+
+	```
+	{
+	  "services": {
+	    "user-provided": [
+	      {
+	        "name":  "weather-service",
+	        "credentials": {
+	          "apiKey": "API_KEY",
+	          "url":    "http://api.weather.com"
+	        }
+	      }
+	    ]
+	  }
+	}
+	```
+	Replace `API_KEY` with your provided TWC API key.
+	
+2. Restage your application
+
+	```
+	$ npm run watch
+	```
 
 ## Decomposition Instructions
 The primary purpose of this demo is to provide a sample implementation of the Weather Channel API. The relevant code for this integration is located within the `lib/weatherService.js` file and has been extracted into several [source gists][gist_url]. All helper functions are also included in the gists for reference. This section details the callback functions created to call this API.
@@ -134,7 +168,8 @@ This data is collected from the VCAP_APPLICATION environment variable in IBM Blu
 
 Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `app.js` file.
 
-[weather_api_url]: http://www.wunderground.com/weather/api/
+[weather_insights_url]: https://console.ng.bluemix.net/catalog/services/insights-for-weather/
+[live_demo_url]: https://capital-weather.mybluemix.net/
 [leaflet_url]: http://leafletjs.com/
 [esri_leaflet_url]: http://esri.github.io/esri-leaflet/
 [bluemix_signup_url]: https://ibm.biz/capital-weather-signup
