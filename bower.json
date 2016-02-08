@@ -1,0 +1,16 @@
+{
+  "name": "capital-weather",
+  "version": "1.1.2",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "public/vendor"
+  ],
+  "dependencies": {
+    "jquery": "2.1.x",
+    "bootstrap": "3.3.x",
+    "leaflet": "0.7.x",
+    "esri-leaflet": "1.0.x"
+  }
+}

@@ -3,7 +3,7 @@
     "info": {
         "title": "Weather History API",
         "description": "Get detailed weather data for the past, present, and future for a specific lat/lon",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contact": {
             "email": "jepeyser@us.ibm.com"
         },
@@ -32,6 +32,10 @@
         {
             "name": "prediction",
             "description": "Projected weather info for a specific month and and day"
+        },
+        {
+            "name": "info",
+            "description": "Info about the service metadata"
         }
     ],
     "paths": {
@@ -226,7 +230,24 @@
                     }
                 }
             }
-        }
+        },
+        "/serviceType": {
+            "get": {
+                "summary": "Get the type of weather service being used",
+                "description": "The ServiceType endpoint returns a value indicating whether the TWC or Weather Insights service is being used\n",
+                "tags": [
+                    "info"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/ServiceType"
+                        }
+                    }
+                }
+            }
+        },
     },
     "definitions": {
         "Condition": {
@@ -294,6 +315,17 @@
                     "type": "boolean"
                 },
                 "noData": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ServiceType": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
                     "type": "boolean"
                 }
             }

@@ -13,7 +13,8 @@ var Map,
     geocoder = new google.maps.Geocoder,
     curZoom,
     datePicker,
-    capitalsLeft;
+    capitalsLeft,
+    fullService;
 
 $(onLoad)
 
@@ -35,6 +36,15 @@ function onLoad() {
     forkNode.innerHTML = forkHtml;
     $(".leaflet-control-container")[0].appendChild(forkNode);
   }, 1000);
+
+  // Determines what type of weather service is being used (TWC or Weather Insights)
+  $.ajax("/api/serviceType", {
+    dataType: "json",
+    success: function(data, status, jqXhr) {
+      if (!data.error)
+        fullService = data.type;
+    }
+  })
 
   // Initialize map in a disabled state
   Map = L.map("map", {
@@ -294,17 +304,20 @@ function gotCurrentConditions(location, data, status, jqXhr) {
     "</table>"
   ].join("\n");
 
-  // Set the HTML for the current condition popup
-  var onHistoryClick = "javascript:getHistoricConditions(" + loc + ")";
-  var onPastDateClick = "javascript:enterDate(" + loc + ", false)";
-  var onFutureDateClick = "javascript:enterDate(" + loc + ", true)";
-  var buttons = [
-    "<img class='date_img' alt='Weather on a past date' title='Weather on a past date' src='images/date_icon.png' onclick='" + onPastDateClick + "'></img>",
-    "<img class='history_img' alt='Weather on this date in history' title='Weather on this date in history' src='images/history_icon.png' onclick='" + onHistoryClick + "'></img>",
-    "<img class='predict_img' alt='Predict weather on a future date' title='Predict weather on a future date' src='images/predict_icon.png' onclick='" + onFutureDateClick + "'></img>"
-  ].join("\n");
+  var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table;
 
-  var popupText = "<h4 class='popup-header'>" + location.name + "</h4><p>" + table + buttons;
+  // Set the HTML for the current condition popup
+  if (fullService) {
+    var onHistoryClick = "javascript:getHistoricConditions(" + loc + ")";
+    var onPastDateClick = "javascript:enterDate(" + loc + ", false)";
+    var onFutureDateClick = "javascript:enterDate(" + loc + ", true)";
+    var buttons = [
+      "<img class='date_img' alt='Weather on a past date' title='Weather on a past date' src='images/date_icon.png' onclick='" + onPastDateClick + "'></img>",
+      "<img class='history_img' alt='Weather on this date in history' title='Weather on this date in history' src='images/history_icon.png' onclick='" + onHistoryClick + "'></img>",
+      "<img class='predict_img' alt='Predict weather on a future date' title='Predict weather on a future date' src='images/predict_icon.png' onclick='" + onFutureDateClick + "'></img>"
+    ].join("\n");
+    popupText += buttons;
+  }
 
   // Replace default marker with weather icon
   var marker = location.marker;
