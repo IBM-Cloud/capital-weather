@@ -87,7 +87,12 @@ Bluemix provides access to the Insights for Weather service, an API exposing a s
 	```
 	$ cf cups weather-service -p '{"url":"http://	api.weather.com","apiKey":"API_KEY"}'
 	```
-2. Restage your app so that this new service supercedes the existing Insights for Weather service
+2. Bind this new service to your existing Capital Weather app
+
+	```
+	$ cf bind-service capital-weather weather-service
+	```
+3. Restage your app so that this new service supercedes the existing Insights for Weather service
 
 	```
 	$ cf restage capital-weather

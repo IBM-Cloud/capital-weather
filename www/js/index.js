@@ -10,20 +10,20 @@
 
 var Map,
     Help,
-    geocoder = new google.maps.Geocoder,
+    geocoder = new google.maps.Geocoder(),
     curZoom,
     datePicker,
     capitalsLeft,
     fullService;
 
-$(onLoad)
+$(onLoad);
 
 // Get capital cities from locations.js file
 // If running locally, only use 1st 10 cities for debugging
 Locations = getLocations();
-/*if (location.hostname == "localhost") {
+if (location.hostname == "localhost") {
    Locations = Locations.slice(0,10);
-}*/
+}
 capitalsLeft = Locations.length-1;
 
 //------------------------------------------------------------------------------
@@ -31,9 +31,8 @@ function onLoad() {
 
   // Inject 'Fork me on GitHub' banner into map UI
   setTimeout(function(){
-    var forkHtml = "<a href=\"https://github.com/IBM-Bluemix/capital-weather\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67\" alt=\"Fork me on GitHub\" data-canonical-src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\"></a>"
     var forkNode = document.createElement("div");
-    forkNode.innerHTML = forkHtml;
+    forkNode.innerHTML = '<a href=\"https://github.com/IBM-Bluemix/capital-weather\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67\" alt=\"Fork me on GitHub\" data-canonical-src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\"></a>';
     $(".leaflet-control-container")[0].appendChild(forkNode);
   }, 1000);
 
@@ -44,22 +43,23 @@ function onLoad() {
       if (!data.error)
         fullService = data.type;
     }
-  })
+  });
 
   // Initialize map in a disabled state
   Map = L.map("map", {
     doubleClickZoom: false,
-    zoom: 5
+    zoom: 5,
+    smartNavigation: false
   });
   curZoom = getIconZoom(5);
 
   // Create the help buttons in bottom-left of map
   Help = L.popup()
-    .setContent(getHelpHTML())
+    .setContent(getHelpHTML());
   createHelpBtn("help", "Help", displayHelp);
 
   Key = L.popup()
-    .setContent(getKeyHTML())
+    .setContent(getKeyHTML());
   createHelpBtn("key", "Key", displayKey);
 
   setTimeout(displayHelp, 1000);
@@ -96,34 +96,19 @@ function onLoad() {
       title:   location.name,
       alt:     location.name,
       opacity: 1
-    })
-
-    location.marker = marker;
-    marker.addTo(Map);
-  })
-
-//---Map Event Listeners--------------------------------------------------------
-
-  // Mouse Double-click: Gets the current weather conditions on location clicked
-  Map.on("dblclick", function(e) {
-    var location = {
-      lat:  e.latlng.lat,
-      lon:  e.latlng.lng,
-      name: e.latlng.lat.toFixed(4) + ", " + e.latlng.lng.toFixed(4)
-    };
-
-    var marker = L.marker(location, {
-      title:   location.name,
-      alt:     location.name,
-      opacity: 0
     });
 
     location.marker = marker;
     marker.addTo(Map);
+  });
 
-    getLocationName(e.latlng.lat, e.latlng.lng, location);
-    getCurrentConditions(location);
-  })
+//---Map Event Listeners--------------------------------------------------------
+
+  // Mouse Double-click: Gets the current weather conditions on location clicked
+  // and adds the city at those coordinates to the Locations array
+  Map.on("dblclick", function(e) {
+    getLocationName(e.latlng.lat, e.latlng.lng);
+  });
 
   // New Zoom Level: Adjusts marker icon size
   Map.on("zoomend", function(e) {
@@ -163,7 +148,7 @@ function createHelpBtn(bttnId, text, displayFunc) {
     });
 
     return div;
-  }
+  };
   helpBtn.addTo(Map);
 }
 
@@ -182,20 +167,20 @@ function destroyDatepicker() {
 var displayHelp = function displayHelp(location) {
   Help
     .setLatLng(Map.getCenter())
-    .openOn(Map)
-}
+    .openOn(Map);
+};
 
 //------------------------------------------------------------------------------
 // Displays the key box in the center of the web page
 var displayKey = function displayKey(location) {
   Key
     .setLatLng(Map.getCenter())
-    .openOn(Map)
-}
+    .openOn(Map);
+};
 
 //------------------------------------------------------------------------------
 // Retrieves the corresponding city/state/country for the input lat/lon
-function getLocationName(lat, lon, loc) {
+function getLocationName(lat, lon) {
   var latlng = {lat: lat, lng: lon};
   geocoder.geocode({'location': latlng}, function(results, status) {
     if (status === google.maps.GeocoderStatus.OK) {
@@ -230,24 +215,17 @@ function getLocationName(lat, lon, loc) {
         }
 
         if (country === "United States") {
-          if (city)
-            loc.name = loc.marker.title = loc.marker.alt = (city + ", " + state);
-          else if (county)
-            loc.name = loc.marker.title = loc.marker.alt = (county + ", " + state);
+          if (city) addMarker(lat, lon, state, city);
+          else if (county) addMarker(lat, lon, state, county);
         }
         else if (country === "Canada") {
-          if (city)
-            loc.name = loc.marker.title = loc.marker.alt = (city + ", " + state);
-          else if (municipality)
-            loc.name = loc.marker.title = loc.marker.alt = (municipality + ", " + state);
-          else if (state)
-            loc.name = loc.marker.title = loc.marker.alt = (state + ", " + country);
+          if (city) addMarker(lat, lon, state, city);
+          else if (municipality) addMarker(lat, lon, state, municipality);
+          else if (state) addMarker(lat, lon, country, state);
         }
         else if (country)
-          if (city)
-            loc.name = loc.marker.title = loc.marker.alt =  (city + ", " + country);
-          else
-            loc.name = loc.marker.title = loc.marker.alt =  (state + ", " + country);
+          if (city) addMarker(lat, lon, country, city);
+          else addMarker(lat, lon, country, state);
       }
       else {
         console.error('No results found for reverse geocoding');
@@ -257,6 +235,28 @@ function getLocationName(lat, lon, loc) {
       console.error('Geocoder failed due to: ' + status);
     }
   });
+}
+
+//------------------------------------------------------------------------------
+// Adds a marker to the map once all location info is known
+function addMarker(lat, lon, largeLoc, littleLoc) {
+
+    var location = {
+      lat:  lat,
+      lon:  lon,
+      name: littleLoc + ", " + largeLoc
+    };
+
+    location.marker = L.marker(location, {
+      title:   location.name,
+      alt:     location.name,
+      opacity: 0
+    });
+
+    location.marker.addTo(Map);
+
+    Locations.push(location);
+    getCurrentConditions(location);
 }
 
 //------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ function getCurrentConditions(location) {
       if (!data.error)
         gotCurrentConditions(location, data, status, jqXhr);
     }
-  })
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -279,13 +279,14 @@ function getCurrentConditions(location) {
 function gotCurrentConditions(location, data, status, jqXhr) {
 
   // Extract the info from the returned data
-  if (null == data) return;
+  if (data === null) return;
 
   var icon = code2icon(data.iconCode);
   var desc = data.conditionPhrase;
   var uvPhrase = code2uv(data.uvIndex);
 
-  var temp = windSpeed = "???";
+  var temp, windSpeed;
+  temp = windSpeed = "???";
   if (data.temp !== null) temp = getTempString(data.temp);
   if (data.windSpeed !== null) windSpeed = getSpeedString(data.windSpeed);
 
@@ -322,12 +323,12 @@ function gotCurrentConditions(location, data, status, jqXhr) {
   // Replace default marker with weather icon
   var marker = location.marker;
   marker.iconCode = icon;
-  var icon = L.divIcon({
+  var markerIcon = L.divIcon({
     html:      "<i class='wi " + icon + " " + curZoom.zoomClass + "'></i>",
     iconSize:  curZoom.zoomSize,
     className: "location-icon"
   });
-  marker.setIcon(icon);
+  marker.setIcon(markerIcon);
 
   marker.bindPopup(popupText);
   marker.setOpacity(1);
@@ -391,7 +392,7 @@ function enterDate(location, getFuture) {
   L.popup()
     .setContent(popUpText)
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 
   $(function() {
     var curDate = new Date(),
@@ -448,20 +449,20 @@ function getFutureDateData(location) {
   L.popup()
     .setContent("Predicting weather for " + dateInfo.getDisplayDate() + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 
   $.ajax("/api/predictConditions?latitude=" + lat + "&longitude=" + lon + "&month=" + dateInfo.month + "&day=" + dateInfo.day, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotFutureConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
+      gotFutureConditions(location, data, status, jqXhr, dateInfo.getDisplayDate());
     },
     error: function() {
       L.popup()
         .setContent("Error predicting weather for " + dateInfo.getDisplayDate() + ", sorry!")
         .setLatLng(location)
-        .openOn(Map)
+        .openOn(Map);
     }
-  })
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -489,7 +490,7 @@ function gotFutureConditions(location, data, status, jqXhr, dateString) {
     L.popup()
       .setContent(errMsg)
       .setLatLng(location)
-      .openOn(Map)
+      .openOn(Map);
     }
 }
 
@@ -506,20 +507,20 @@ function getPastDateData(location) {
   L.popup()
     .setContent("Getting weather data for " + dateInfo.getDisplayDate() + "... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 
   $.ajax("/api/pastConditions?latitude=" + lat + "&longitude=" + lon + "&month=" + dateInfo.month + "&day=" + dateInfo.day + "&year=" + dateInfo.year, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotPastConditions(location, data, status, jqXhr, dateInfo.getDisplayDate())
+      gotPastConditions(location, data, status, jqXhr, dateInfo.getDisplayDate());
     },
     error: function() {
       L.popup()
         .setContent("Error getting weather data for " + dateInfo.getDisplayDate() + ", sorry!")
         .setLatLng(location)
-        .openOn(Map)
+        .openOn(Map);
     }
-  })
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -542,11 +543,11 @@ function gotPastConditions(location, data, status, jqXhr, dateString) {
     if (typeof e === 'string')
       errMsg = e;
     else
-      errMsg = "Error getting weather data for " + dateString + ", sorry!"
+      errMsg = "Error getting weather data for " + dateString + ", sorry!";
     L.popup()
       .setContent(errMsg)
       .setLatLng(location)
-      .openOn(Map)
+      .openOn(Map);
     }
 }
 
@@ -558,7 +559,7 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   var onBackClick = "javascript:goBack(\"" + location.name + "\")";
   var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>";
 
-  var temp = getTempString(condition[0]);;
+  var temp = getTempString(condition[0]);
   var icon = code2icon(condition[2]);
   var weather = [
     "<table>",
@@ -579,32 +580,32 @@ function showWeatherForDate(showPrediction, location, condition, dateString, sta
   L.popup()
     .setContent(popupHTML)
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 }
 
 //------------------------------------------------------------------------------
 // Make call to weather API to get past weather conditions
 function getHistoricConditions(location) {
-  var lat = location.lat
-  var lon = location.lon
+  var lat = location.lat;
+  var lon = location.lon;
 
   L.popup()
     .setContent("Getting historical data... <br><center><img class='loading_gif' src='images/weather_loading.gif'><center>")
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 
   $.ajax("/api/historicConditions?latitude=" + lat + "&longitude=" + lon, {
     dataType: "json",
     success: function(data, status, jqXhr) {
-      gotHistoricConditions(location, data, status, jqXhr)
+      gotHistoricConditions(location, data, status, jqXhr);
     },
     error: function() {
       L.popup()
         .setContent("Error getting historical data, sorry!")
         .setLatLng(location)
-        .openOn(Map)
+        .openOn(Map);
     }
-  })
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -622,26 +623,26 @@ function gotHistoricConditions(location, data, status, jqXhr) {
     if (typeof e === 'string')
       errMsg = e;
     else
-      errMsg = "Error getting historical data, sorry!"
+      errMsg = "Error getting historical data, sorry!";
     L.popup()
       .setContent(errMsg)
       .setLatLng(location)
-      .openOn(Map)
+      .openOn(Map);
     }
 }
 
 //------------------------------------------------------------------------------
 // Display historical weather results
 function showHistory(location, history) {
-  Map.closePopup()
+  Map.closePopup();
 
-  var onBackClick = "javascript:goBack(\"" + location.name + "\")"
+  var onBackClick = "javascript:goBack(\"" + location.name + "\")";
   var backBttn = "<img onclick='" + onBackClick + "' class='back-arrow' src='images/left_gray.png'>"
 
   var table = [
     "<table>",
       "<tr><td><strong>Year</strong> <td class='td-history'><strong>Temp</strong> <td class='td-history'><strong>Conditions</strong>",
-  ]
+  ];
 
   history.forEach(function(data){
     var historyYear = JSON.parse(data);
@@ -652,19 +653,19 @@ function showHistory(location, history) {
                 "<td class='td-history'>" + temp +
                 "<td class='td-history'>" + cond;
 
-    table.push(entry)
-  })
-  table.push("</table>")
-  table = table.join("\n")
+    table.push(entry);
+  });
+  table.push("</table>");
+  table = table.join("\n");
 
-  var desc = "<p>Conditions on this day in previous years:"
+  var desc = "<p>Conditions on this day in previous years:";
 
-  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + table
+  var popupHTML = backBttn + "<h4 class='popup-header'>" + location.name + "</h4>" + desc + "<p>" + table;
 
   L.popup()
     .setContent(popupHTML)
     .setLatLng(location)
-    .openOn(Map)
+    .openOn(Map);
 }
 
 //------------------------------------------------------------------------------
