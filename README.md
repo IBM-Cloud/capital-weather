@@ -36,7 +36,7 @@ The application is built to interface with the Insights for Weather service on B
 7. Create the Weather Channel service in Bluemix.
 
   ```
-  $ cf create-service weatherinsights Free capital-weather-service
+  $ cf create-service weatherinsights Free capital-weather-insights
   ```
 
 8. Push the app to Bluemix.
