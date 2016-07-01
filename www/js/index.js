@@ -22,7 +22,7 @@ $(onLoad);
 // If running locally, only use 1st 10 cities for debugging
 Locations = getLocations();
 if (location.hostname == "localhost") {
-   Locations = Locations.slice(0,10);
+   Locations = Locations.slice(0,5);
 }
 capitalsLeft = Locations.length-1;
 

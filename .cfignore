@@ -1,8 +1,9 @@
 /www/bower
-node_modules
+node_modules/
+.git/
 vcap-local.json
 .gitignore
-.git
 README.md
 Cakefile
+*.DS_Store
 *.log

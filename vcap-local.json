@@ -2,16 +2,16 @@
   "services": {
     "weatherinsights": [
       {
-         "name": "capital-weather-insights",
+         "name": "capital-weather-data",
          "label": "weatherinsights",
-         "plan": "Free",
+         "plan": "Free-v2",
          "credentials": {
-            "username": "USER",
-            "password": "PASSWORD",
-            "host": "twcservice.mybluemix.net",
-            "port": 443,
-            "url": "https://USER:PASSWORD@twcservice.mybluemix.net"
-          }
+          "username": "USER",
+          "password": "PASSWORD",
+          "host": "twcservice.mybluemix.net",
+          "port": 443,
+          "url": "https://USER:PASSWORD@twcservice.mybluemix.net"
+        }
       }
     ],
     "user-provided": [

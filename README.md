@@ -1,5 +1,7 @@
 # Capital Weather Overview
 
+[![Build Status](https://travis-ci.org/IBM-Bluemix/capital-weather.svg?branch=master)](https://travis-ci.org/IBM-Bluemix/capital-weather)
+
 Capital Weather is a sample Bluemix application which utilizes the [Weather Channel service][weather_insights_url], two mapping APIs, [Leaflet][leaflet_url] and [Esri Leaflet][esri_leaflet_url], and the [Google Maps Geocoding API][geocoding_api_url]. It allows users to visualize the current weather in all the world capitals, as well as obtain historical weather data and future weather projections. The app provides a real world use case of the Weather Channel API and implements several of the methods exposed by that interface.
 
 The application is built to interface with the Insights for Weather service on Bluemix or the full TWC API. It will dynamically adjust the capabilities available in the UI based on which service is being used.
@@ -36,7 +38,7 @@ The application is built to interface with the Insights for Weather service on B
 7. Create the Weather Channel service in Bluemix.
 
   ```
-  $ cf create-service weatherinsights Free capital-weather-insights
+  $ cf create-service weatherinsights Free-v2 capital-weather-data
   ```
 
 8. Push the app to Bluemix.
@@ -173,7 +175,7 @@ This data is collected from the VCAP_APPLICATION environment variable in IBM Blu
 
 Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `app.js` file.
 
-[weather_insights_url]: https://console.ng.bluemix.net/catalog/services/insights-for-weather/
+[weather_insights_url]: https://new-console.ng.bluemix.net/catalog/services/weather-company-data-for-ibm-bluemix/
 [live_demo_url]: https://capital-weather.mybluemix.net/
 [leaflet_url]: http://leafletjs.com/
 [esri_leaflet_url]: http://esri.github.io/esri-leaflet/

@@ -1,8 +1,14 @@
 {
   "name":               "capital-weather",
-  "version":            "1.1.2",
-  "private": false,
-  "main": "app.js",
+  "version":            "1.2.0",
+  "description":        "Using ArcGIS and the Weather Channel and Google Maps Geocoding APIs, discover and interact with weather data from any city across the world.",
+  "private":            false,
+  "main":               "app.js",
+  "keywords": [
+    "bluemix",
+    "weather",
+    "weather-company"
+  ],
   "scripts": {
     "cake":             "cake",
     "watch":            "cake watch",
@@ -10,12 +16,15 @@
     "postinstall":      "bower install --allow-root"
   },
   "engines": {
-      "node": "4.0.*"
+      "node":           "4.0.*"
   },
   "license":            "Apache-2.0",
   "repository": {
     "type":             "git",
     "url" :             "https://github.com/IBM-Bluemix/capital-weather.git"
+  },
+  "bugs": {
+    "url":              "https://github.com/IBM-Bluemix/capital-weather/issues"
   },
   "dependencies": {
     "async":            "0.9.x",
@@ -31,7 +40,8 @@
     "cakex":            "0.1.x",
     "coffee-script":    "1.9.x"
   },
-  "author": [
+  "author":             "IBM Corp.",
+  "contributors": [
     {
       "name": "Jake Peyser",
       "email": "jepeyser@us.ibm.com"

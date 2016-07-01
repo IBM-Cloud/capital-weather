@@ -2,3 +2,4 @@
 node_modules
 vcap-local.json
 *.log
+*.DS_Store

@@ -1,8 +1,8 @@
 ---
 declared-services:
-  capital-weather-insights:
+  capital-weather-data:
     label: weatherinsights
-    plan: Free
+    plan: Free-v2
 applications:
 - name:       capital-weather
   host:       capital-weather
@@ -13,4 +13,4 @@ applications:
   command:    node app.js
   buildpack:  sdk-for-nodejs
   services:
-  - capital-weather-insights
+  - capital-weather-data
