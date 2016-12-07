@@ -175,7 +175,7 @@ This data is collected from the VCAP_APPLICATION environment variable in IBM Blu
 
 Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `app.js` file.
 
-[weather_insights_url]: https://new-console.ng.bluemix.net/catalog/services/weather-company-data-for-ibm-bluemix/
+[weather_insights_url]: https://console.ng.bluemix.net/catalog/services/weather-company-data/
 [live_demo_url]: https://capital-weather.mybluemix.net/
 [leaflet_url]: http://leafletjs.com/
 [esri_leaflet_url]: http://esri.github.io/esri-leaflet/
